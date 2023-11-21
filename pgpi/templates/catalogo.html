@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CATÁLOGO DE PRODUCTOS</title>
+    {% load static %}
+</head>
+<body>
+<h1>CATÁLOGO DE PRODUCTOS</h1>
+
+{% for categoria, productos in productos_por_categoria.items %}
+    <h2>{{ categoria }}</h2>
+
+    {% for producto in productos %}
+        <div>
+            <h3>{{ producto.nombre }}</h3>
+            <p>Precio: {{ producto.precio }}</p>
+            {% if producto.imagen %}
+                <img src="{% static 'media/productos/' %}{{ producto.imagen }}" alt="{{ producto.nombre }}">
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+</body>
+</html>
