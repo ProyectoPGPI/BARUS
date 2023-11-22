@@ -20,6 +20,6 @@ from authentication import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('pgpi.urls')),
+    path('',include('catalogo.urls')),
     path('signup/', views.signup,name='signup'),
 ]
