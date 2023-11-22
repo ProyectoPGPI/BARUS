@@ -1,40 +1,46 @@
 [
     {
-        "model": "pgpi.producto",
+        "model": "catalogo.producto",
         "pk": 1,
         "fields": {
             "nombre": "Producto 1",
             "precio": 19.99,
             "descripcion": "Descripción del Producto 1",
             "fecha_registro": "2023-11-18",
-            "tipo_categoria": "exterior",
+            "tipo_seccion": "exterior",
             "imagen": "1.jpeg",
-            "avalible": true
+            "avalible": true,
+            "departamento": "cocina",
+            "fabricante": "Bosh"
         }
     },
     {
-        "model": "pgpi.producto",
+        "model": "catalogo.producto",
         "pk": 2,
         "fields": {
             "nombre": "Producto 2",
             "precio": 29.99,
             "descripcion": "Descripción del Producto 2",
             "fecha_registro": "2023-11-18",
-            "tipo_categoria": "maquinaria",
+            "tipo_seccion": "maquinaria",
             "imagen": "2.jpeg",
-            "avalible": true
+            "avalible": true,
+            "departamento": "cocina",
+            "fabricante": "Bosh"
         }
     },{
-        "model": "pgpi.producto",
+        "model": "catalogo.producto",
         "pk": 3,
         "fields": {
             "nombre": "Producto 3",
             "precio": 39.99,
             "descripcion": "Descripción del Producto 3",
             "fecha_registro": "2023-11-18",
-            "tipo_categoria": "interior",
+            "tipo_seccion": "interior",
             "imagen": "3.jpeg",
-            "avalible": true
+            "avalible": true,
+            "departamento": "cocina",
+            "fabricante": "Bosh"
         }
     }
 ]
