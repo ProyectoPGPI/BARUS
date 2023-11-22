@@ -21,3 +21,4 @@ class Producto(models.Model):
     def __str__(self):
         return self.nombre
     
+#Este es el comentario para el gitignore
