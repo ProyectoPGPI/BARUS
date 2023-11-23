@@ -1,0 +1,30 @@
+<!--#####################################################################################
+    #Este HTML muestra los archivos obtenidos tras filtrar los productos en la búsqueda.#
+    #####################################################################################-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados de Búsqueda</title>
+</head>
+<body>
+    <h1>Resultados de Búsqueda</h1>
+
+    {% if productos %}
+        <ul>
+            {% for producto in productos %}
+                <li>
+                    <h3>{{ producto.nombre }}</h3>
+                    <p>Precio: {{ producto.precio }}</p>
+                    {% if producto.imagen %}
+                        <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}">
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No se encontraron productos que coincidan con la búsqueda.</p>
+    {% endif %}
+</body>
+</html>
