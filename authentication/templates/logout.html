@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Iniciar sesión</title>
+    </head>
+    <body>
+        <form method="post">
+            {% crsf_token %}
+        <div class="fieldWrapper">
+            <label for="email">Email:</label>
+            <input type="email" name="email" class="form-control mb-2" required id="email">
+        </div>
+
+        <div class="fieldWrapper">
+            <label for="password">Password:</label>
+            <input type="password" name="password" class="form-control mb-2" required id="password1">
+        </div>
+
+        <div class="row">
+            <div class="col-9">
+                <input type="submit" class="btn btn-primary" value="Login">
+            </div>
+        </div>F
+    </form>
+    </body>
+</html>

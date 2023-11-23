@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import include, path
+
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -6,7 +7,7 @@ from django.conf.urls.static import static
 urlpatterns = [
 
     path('', views.index),
-    path('catalogo/',views.catalogo)
+    path('catalogo/',views.catalogo, name = 'catalogo'),
     
 ]
 if settings.DEBUG:
