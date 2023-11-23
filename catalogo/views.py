@@ -1,11 +1,14 @@
 from django.http import HttpResponse, JsonResponse
 from .models import  Producto, TipoSeccion
 from django.shortcuts import render
+
 from django.template import loader
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.http import Http404
 
+from django.shortcuts import render, redirect
+from django.db.models import Q
 
 
 #ESTO ES NUESTRO PROYECTO
@@ -38,3 +41,32 @@ def product_view(request, product_id):
     producto = Producto.objects.get(id=product_id)
     context['producto'] = producto
     return render(request, 'producto.html', context)
+
+###################################################################################
+#Función para buscar productos por nombre, descripción, departamento o fabricante.#
+###################################################################################
+
+def buscar_producto(request):
+    busqueda = request.GET.get('Buscar')
+    productos = Producto.objects.all()
+
+    if busqueda is not None:
+        productos = Producto.objects.filter(Q(nombre__icontains=busqueda) | Q(descripcion__icontains=busqueda) | Q(departamento__icontains=busqueda) | Q(fabricante__icontains=busqueda))
+    else: 
+        return redirect('catalogo')
+    
+    return render(request, 'catalogo.html', {'productos': productos})
+
+
+####################################################
+#Función para mostrar los productos de la búsqueda.#
+####################################################
+
+def mostrar_resultados_busqueda(request):
+    busqueda = request.GET.get('Buscar', '').strip()
+
+    if busqueda:  
+        productos = Producto.objects.filter(Q(nombre__icontains=busqueda) | Q(descripcion__icontains=busqueda) | Q(departamento__icontains=busqueda) | Q(fabricante__icontains=busqueda))
+        return render(request, 'busqueda_resultados.html', {'productos': productos, 'busqueda': busqueda})
+    else:
+        return redirect('catalogo')
