@@ -1,6 +1,10 @@
 from django.http import HttpResponse, JsonResponse
 from .models import  Producto, TipoSeccion
 from django.shortcuts import render
+from django.template import loader
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.http import Http404
 
 
 
@@ -14,13 +18,23 @@ def index(request):
 
 
 def catalogo(request):
-    productos_por_seccion = {}
-    secciones = TipoSeccion.choices
+    context = {}
+    opcion_seleccionada = 'general'
 
-    for seccion in secciones:
-        if seccion[0] == 'general':
-            productos_por_seccion[seccion[1]] = Producto.objects.all()
+    if request.method == 'POST':
+        # Obtén el valor seleccionado del menú desplegable
+        opcion_seleccionada = request.POST.get('opcion')
+
+    if(opcion_seleccionada!=None):
+        if opcion_seleccionada == 'general':
+            context['productos'] = Producto.objects.all()
         else:
-            productos_por_seccion[seccion[1]] = Producto.objects.filter(tipo_seccion=seccion[0])
+            context['productos'] = Producto.objects.filter(tipo_seccion=opcion_seleccionada)
+    context['opcion_seleccionada'] = opcion_seleccionada
+    return render(request, 'catalogo.html', context)
 
-    return render(request, 'catalogo.html', {'productos_por_seccion': productos_por_seccion})
+def product_view(request, product_id):
+    context = {}
+    producto = Producto.objects.get(id=product_id)
+    context['producto'] = producto
+    return render(request, 'producto.html', context)

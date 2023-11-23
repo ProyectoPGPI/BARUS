@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Producto</title>
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" src="{% static 'producto/producto.css' %}" />
+    
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Barus</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Inicio</a>
+                    </li>
+                </ul>
+                <span class="navbar-text" v-if="!signup">
+                    <a href="/authentication/logout-view"><button class="btn btn-secondary">Logout</button></a>
+                </span>
+            </div>
+        </div>
+    </nav>
+    <div class="d-flex row justify-content-center mx-auto align-items-center" style="height: calc(100vh - 70px);">
+        <a class="col-3" href="/producto/{{ producto.pk }}" style="text-decoration: none;">
+            <div class="card" style="padding-left: 0; padding-right: 0;">
+                {% if producto.imagen %}
+                <div class="mx-auto"
+                    style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
+                </div>
+                {% endif %}
+                <div>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ producto.nombre }}</h3>
+                        <p class="card-text">{{ producto.descripcion }}</p>
+                        <p class="card-text">{{ producto.precio }}€</p>
+                        <span class="badge bg-secondary">{{ producto.departamento }}</span>
+                        <span class="badge bg-secondary">{{ producto.fabricante }}</span>
+                        <span class="badge bg-secondary">{{ producto.tipo_seccion }}</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="text-center">
+        <button class="btn btn-warning">Añadir al carrito</button>
+    </div>
+
+</body>
+
+</html>
