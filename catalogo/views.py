@@ -1,24 +1,12 @@
-from django.http import HttpResponse, JsonResponse
-from .models import  Producto, TipoSeccion
-from django.shortcuts import render
-
-from django.template import loader
-from django.views.generic import TemplateView
-from django.conf import settings
-from django.http import Http404
+from .models import  Producto
 
 from django.shortcuts import render, redirect
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
 
 
 #ESTO ES NUESTRO PROYECTO
-
-def index(request):
-    title = 'Proyecto de PGPI!!'
-    return render(request, 'index.html',{
-        'title' : title
-    })
-
 
 def catalogo(request):
     context = {}
@@ -70,3 +58,24 @@ def mostrar_resultados_busqueda(request):
         return render(request, 'busqueda_resultados.html', {'productos': productos, 'busqueda': busqueda})
     else:
         return redirect('catalogo')
+    
+###########################################################
+#Vista para el carrito de la compra                       #
+###########################################################
+    
+def mostrar_carrito(request):
+    return render(request, 'carrito.html')
+
+###########################################################
+#Vistas para pago de clientes registrados / no registrados#
+###########################################################
+
+# Vista para usuarios autenticados
+@login_required(login_url='/')
+def pago_usuario_registrado(request):
+    return render(request, 'pago_usuario_registrado.html')
+
+# Vista para usuarios no autenticados
+@user_passes_test(lambda user: not user.is_authenticated, login_url='/')
+def pago_usuario_no_registrado(request):
+    return render(request, 'pago_usuario_no_registrado.html')

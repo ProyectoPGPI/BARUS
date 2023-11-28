@@ -9,7 +9,10 @@ urlpatterns = [
     path('',views.catalogo, name='catalogo'),
     path('producto/<int:product_id>', views.product_view),
     path('buscar/', buscar_producto, name='buscar_producto'),
-    path('resultados_busqueda/', mostrar_resultados_busqueda, name='resultados_busqueda'),    
+    path('resultados_busqueda/', mostrar_resultados_busqueda, name='resultados_busqueda'),
+    path('carrito/', mostrar_carrito, name='carrito'),
+    path('pagar/', views.pago_usuario_no_registrado, name='pago_usuario_no_registrado'),
+    path('pagar_user/', views.pago_usuario_registrado, name='pago_usuario_registrado'),    
 
 ]
 if settings.DEBUG:
