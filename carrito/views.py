@@ -14,6 +14,7 @@ from .models import Carrito, ItemCarrito
 
 def carrito(request):
     context = {}
+    context['usuario'] = request.user
     context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
     return render(request, 'carrito.html', context)
 
@@ -25,7 +26,7 @@ def actualizar_carrito(request):
         item_carrito.cantidad = cantidad
         item_carrito.save()
 
-        item_carrito.carrito.calcularTotal()
+        item_carrito.carrito.calcular_total()
 
     return redirect('/carrito')
 
@@ -35,6 +36,6 @@ def borrar_del_carrito(request):
         item_carrito = ItemCarrito.objects.get(pk=item_id)
         item_carrito.delete()
 
-        item_carrito.carrito.calcularTotal()
+        item_carrito.carrito.calcular_total()
 
     return redirect('/carrito')

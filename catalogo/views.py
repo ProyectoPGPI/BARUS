@@ -14,15 +14,6 @@ from .models import Producto
 from carrito.models import Carrito, ItemCarrito
 
 
-#ESTO ES NUESTRO PROYECTO
-
-def index(request):
-    title = 'Proyecto de PGPI!!'
-    return render(request, 'index.html',{
-        'title' : title
-    })
-
-
 def catalogo(request):
     context = {}
     opcion_seleccionada = 'general'
@@ -37,6 +28,17 @@ def catalogo(request):
         else:
             context['productos'] = Producto.objects.filter(tipo_seccion=opcion_seleccionada)
     context['opcion_seleccionada'] = opcion_seleccionada
+
+    cont = 0
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.get(cliente_id = request.user.id)
+        cont = carrito.obtener_cantidad_total
+    else:
+        carrito = Carrito.objects.get(id = request.session['carrito_id'])
+        cont = carrito.obtener_cantidad_total
+
+        
+    context['num_productos_carrito'] = cont
     return render(request, 'catalogo.html', context)
 
 def product_view(request, product_id):
@@ -77,13 +79,22 @@ def mostrar_resultados_busqueda(request):
 def agregar_al_carrito(request):
     if request.method == 'POST':
         producto_id = request.POST.get('producto_id')
-        user = request.user
+        cantidad = 1
 
-        # Obtener el producto
+        if request.user.is_authenticated:
+            # Usuario autenticado, usar base de datos
+            usuario = request.user
+            carrito, created = Carrito.objects.get_or_create(cliente=usuario)
+        else:
+            # Usuario no autenticado, usar sesión
+            if 'carrito_id' not in request.session:
+                carrito = Carrito.objects.create()
+                request.session['carrito_id'] = carrito.id
+            else:
+                carrito_id = request.session['carrito_id']
+                carrito = get_object_or_404(Carrito, id=carrito_id)
+
         producto = get_object_or_404(Producto, pk=producto_id)
-
-        # Obtener o crear el carrito del usuario
-        carrito, created = Carrito.objects.get_or_create(cliente=user)
 
         # Verificar si el producto ya está en el carrito
         item_carrito, item_created = ItemCarrito.objects.get_or_create(
@@ -94,13 +105,14 @@ def agregar_al_carrito(request):
 
         # Si el producto ya está en el carrito, incrementar la cantidad
         if not item_created:
-            item_carrito.cantidad += 1
+            item_carrito.cantidad += cantidad
             item_carrito.save()
 
         # Calcular el total del carrito
-        carrito.calcularTotal()
+        carrito.calcular_total()
 
         # Redirigir a la página principal o a la página del carrito
         return redirect('/')  # Puedes cambiar esto a la URL de la página del carrito
 
     return redirect('/')
+    
