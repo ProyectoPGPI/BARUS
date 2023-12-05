@@ -5,8 +5,9 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
 
-
-#ESTO ES NUESTRO PROYECTO
+from django.shortcuts import get_object_or_404, redirect
+from .models import Producto
+from carrito.models import Carrito, ItemCarrito
 
 def catalogo(request):
     context = {}
@@ -22,6 +23,18 @@ def catalogo(request):
         else:
             context['productos'] = Producto.objects.filter(tipo_seccion=opcion_seleccionada)
     context['opcion_seleccionada'] = opcion_seleccionada
+
+    cont = 0
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.get(cliente_id = request.user.id)
+        cont = carrito.obtener_cantidad_total
+    else:
+        if 'carrito_id' in request.session:
+            carrito = Carrito.objects.get(id = request.session['carrito_id'])
+            cont = carrito.obtener_cantidad_total
+
+        
+    context['num_productos_carrito'] = cont
     return render(request, 'catalogo.html', context)
 
 def product_view(request, product_id):
@@ -58,6 +71,7 @@ def mostrar_resultados_busqueda(request):
         return render(request, 'busqueda_resultados.html', {'productos': productos, 'busqueda': busqueda})
     else:
         return redirect('catalogo')
+
     
 ###########################################################
 #Vista para el carrito de la compra                       #
@@ -79,3 +93,45 @@ def pago_usuario_registrado(request):
 @user_passes_test(lambda user: not user.is_authenticated, login_url='/')
 def pago_usuario_no_registrado(request):
     return render(request, 'pago_usuario_no_registrado.html')
+
+
+def agregar_al_carrito(request):
+    if request.method == 'POST':
+        producto_id = request.POST.get('producto_id')
+        cantidad = 1
+
+        if request.user.is_authenticated:
+            # Usuario autenticado, usar base de datos
+            usuario = request.user
+            carrito, created = Carrito.objects.get_or_create(cliente=usuario)
+        else:
+            # Usuario no autenticado, usar sesión
+            if 'carrito_id' not in request.session:
+                carrito = Carrito.objects.create()
+                request.session['carrito_id'] = carrito.id
+            else:
+                carrito_id = request.session['carrito_id']
+                carrito = get_object_or_404(Carrito, id=carrito_id)
+
+        producto = get_object_or_404(Producto, pk=producto_id)
+
+        # Verificar si el producto ya está en el carrito
+        item_carrito, item_created = ItemCarrito.objects.get_or_create(
+            carrito=carrito,
+            producto=producto,
+            defaults={'cantidad': 1}  # Establecer la cantidad a 1 si es la primera vez que se agrega
+        )
+
+        # Si el producto ya está en el carrito, incrementar la cantidad
+        if not item_created:
+            item_carrito.cantidad += cantidad
+            item_carrito.save()
+
+        # Calcular el total del carrito
+        carrito.calcular_total()
+
+        # Redirigir a la página principal o a la página del carrito
+        return redirect('/')  # Puedes cambiar esto a la URL de la página del carrito
+
+    return redirect('/')
+    

@@ -8,7 +8,7 @@
     <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
     <link type="text/css" rel="stylesheet" src="{% static 'producto/producto.css' %}" />
-    
+
 </head>
 
 <body>
@@ -25,6 +25,13 @@
                         <a class="nav-link active" aria-current="page" href="/">Inicio</a>
                     </li>
                 </ul>
+                <button type="button" class="btn btn-primary position-relative">
+                    <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        99+
+                        <span class="visually-hidden">unread messages</span>
+                    </span>
+                </button>
                 <span class="navbar-text" v-if="!signup">
                     <a href="/authentication/logout-view"><button class="btn btn-secondary">Logout</button></a>
                 </span>
@@ -52,9 +59,13 @@
             </div>
         </a>
     </div>
-    <div class="text-center">
-        <button class="btn btn-warning">Añadir al carrito</button>
-    </div>
+    <form method="POST" action="{% url 'agregar_al_carrito' %}">
+        {% csrf_token %}
+        <!-- Agregar campos ocultos o parámetros necesarios para identificar el producto -->
+        <input type="hidden" name="producto_id" value="{{ producto.id }}">
+        <button type="submit" class="btn btn-warning text-center">Agregar al Carrito</button>
+    </form>
+    
 
 </body>
 
