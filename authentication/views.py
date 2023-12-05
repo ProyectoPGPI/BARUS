@@ -2,6 +2,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
+from django.contrib import messages
 
 from .forms import EmailAuthenticationForm
 
@@ -27,13 +28,15 @@ def signup(request):
                     password=password1
                 )
                 user.save()
-                return HttpResponse('User created successfully')
+                return redirect('login')
+            
             except Exception as e:
-                return HttpResponse(f'Error creating user: {str(e)}')
+                messages.error(request, f'Error creating user: {str(e)}')
+        else:
+            messages.error(request, 'Passwords do not match')
 
-        return HttpResponse('Passwords do not match')
-
-    return HttpResponse('Invalid request method')
+    # Si hay un error o la contraseña no coincide, permanece en la página de registro y conserva los datos del formulario.
+    return render(request, 'signup.html')
 
 def login_view(request):
     if request.method == 'POST':
