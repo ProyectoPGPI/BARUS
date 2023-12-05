@@ -41,6 +41,10 @@
 
     <!-- Botones de acción -->
     <a href="/"><button type="button" class="btn btn-secondary">Cerrar</button></a>
-    <button type="button" class="btn btn-primary">Realizar Pedido</button>
+    {% if user.is_authenticated %}
+        <a href="{% url 'pago_usuario_registrado' %}"><button type="button" class="btn btn-primary">Realizar Pedido</button></a>
+    {% else %}
+        <a href="{% url 'pago_usuario_no_registrado' %}"><button type="button" class="btn btn-primary">Realizar Pedido</button></a>
+    {% endif %}
 </div>
 {% endblock%}

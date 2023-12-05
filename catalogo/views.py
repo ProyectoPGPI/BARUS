@@ -1,18 +1,13 @@
-from django.http import HttpResponse, JsonResponse
-from .models import  Producto, TipoSeccion
-from django.shortcuts import render
-
-from django.template import loader
-from django.views.generic import TemplateView
-from django.conf import settings
-from django.http import Http404
+from .models import  Producto
 
 from django.shortcuts import render, redirect
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
+
 from django.shortcuts import get_object_or_404, redirect
 from .models import Producto
 from carrito.models import Carrito, ItemCarrito
-
 
 def catalogo(request):
     context = {}
@@ -34,8 +29,9 @@ def catalogo(request):
         carrito = Carrito.objects.get(cliente_id = request.user.id)
         cont = carrito.obtener_cantidad_total
     else:
-        carrito = Carrito.objects.get(id = request.session['carrito_id'])
-        cont = carrito.obtener_cantidad_total
+        if 'carrito_id' in request.session:
+            carrito = Carrito.objects.get(id = request.session['carrito_id'])
+            cont = carrito.obtener_cantidad_total
 
         
     context['num_productos_carrito'] = cont
@@ -75,6 +71,29 @@ def mostrar_resultados_busqueda(request):
         return render(request, 'busqueda_resultados.html', {'productos': productos, 'busqueda': busqueda})
     else:
         return redirect('catalogo')
+
+    
+###########################################################
+#Vista para el carrito de la compra                       #
+###########################################################
+    
+def mostrar_carrito(request):
+    return render(request, 'carrito.html')
+
+###########################################################
+#Vistas para pago de clientes registrados / no registrados#
+###########################################################
+
+# Vista para usuarios autenticados
+@login_required(login_url='/')
+def pago_usuario_registrado(request):
+    return render(request, 'pago_usuario_registrado.html')
+
+# Vista para usuarios no autenticados
+@user_passes_test(lambda user: not user.is_authenticated, login_url='/')
+def pago_usuario_no_registrado(request):
+    return render(request, 'pago_usuario_no_registrado.html')
+
 
 def agregar_al_carrito(request):
     if request.method == 'POST':
