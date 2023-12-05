@@ -26,8 +26,9 @@ def catalogo(request):
 
     cont = 0
     if request.user.is_authenticated:
-        carrito = Carrito.objects.get(cliente_id = request.user.id)
-        cont = carrito.obtener_cantidad_total
+        if Carrito.objects.filter(cliente_id=request.user.id).exists():
+            carrito = Carrito.objects.get(cliente_id = request.user.id)
+            cont = carrito.obtener_cantidad_total
     else:
         if 'carrito_id' in request.session:
             carrito = Carrito.objects.get(id = request.session['carrito_id'])

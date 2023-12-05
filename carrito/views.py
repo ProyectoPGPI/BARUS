@@ -26,7 +26,8 @@ def carrito(request):
              carrito.save()
         context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
     else:
-        context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
+        if Carrito.objects.filter(cliente_id=request.user.id).exists():
+            context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
     return render(request, 'carrito.html', context)
             
 
