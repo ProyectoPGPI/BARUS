@@ -33,8 +33,11 @@ def catalogo(request):
         if 'carrito_id' in request.session:
             carrito = Carrito.objects.get(id = request.session['carrito_id'])
             cont = carrito.obtener_cantidad_total
+    logueado = False
+    if request.user.is_authenticated:
+        logueado = True
 
-        
+    context['logueado'] = logueado     
     context['num_productos_carrito'] = cont
     return render(request, 'catalogo.html', context)
 
@@ -42,6 +45,15 @@ def product_view(request, product_id):
     context = {}
     producto = Producto.objects.get(id=product_id)
     context['producto'] = producto
+    if request.user.is_authenticated:
+        if Carrito.objects.filter(cliente_id=request.user.id).exists():
+            carrito = Carrito.objects.get(cliente_id = request.user.id)
+            cont = carrito.obtener_cantidad_total
+    else:
+        if 'carrito_id' in request.session:
+            carrito = Carrito.objects.get(id = request.session['carrito_id'])
+            cont = carrito.obtener_cantidad_total
+    context['num_productos_carrito'] = cont
     return render(request, 'producto.html', context)
 
 ###################################################################################

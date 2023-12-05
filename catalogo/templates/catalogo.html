@@ -31,16 +31,23 @@
                         <a class="nav-link active" aria-current="page" href="/">Inicio</a>
                     </li>
                 </ul>
-                <a href="/carrito"><button type="button" class="btn btn-primary position-relative">
+                <a href="/carrito"><button type="button" class="btn btn-primary position-relative" style="margin-right: 10px;">
                     <i class="fa fa-shopping-cart" aria-hidden="true"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                       {{ num_productos_carrito }}
                     </span>
                   </button>
                 </a>
-                <span class="navbar-text" v-if="!signup">
+                {% if logueado %}
+                <span class="navbar-text">
                     <a href="/authentication/logout-view"><button class="btn btn-secondary">Logout</button></a>
                 </span>
+                {% endif %}
+                {% if not logueado %}
+                <span class="navbar-text">
+                    <a href="/login/"><button class="btn btn-secondary">Login</button></a>
+                </span>
+                {% endif %}
             </div>
         </div>
     </nav>

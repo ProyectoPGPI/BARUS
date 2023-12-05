@@ -3,6 +3,11 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
+from django.contrib.auth import logout
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
 
 from .forms import EmailAuthenticationForm
 
@@ -53,3 +58,22 @@ def login_view(request):
         form = EmailAuthenticationForm()
 
     return render(request, 'login.html', {'form': form})
+
+class LogoutView(APIView):
+    def post(self, request):
+        key = request.data.get('token', '')
+        try:
+            tk = Token.objects.get(key=key)
+            tk.delete()
+        except ObjectDoesNotExist:
+            pass
+
+        return Response({})
+
+
+def logout_view(request):
+    response = redirect("/")
+    if request.user.is_authenticated == True:
+        logout(request)
+        response.delete_cookie('token')
+    return response
