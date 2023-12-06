@@ -1,13 +1,14 @@
-from .models import  Producto
-
 from django.shortcuts import render, redirect
 from django.db.models import Q
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from django.shortcuts import get_object_or_404, redirect
 from .models import Producto
 from carrito.models import Carrito, ItemCarrito
+import stripe
+from django.conf import settings
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def catalogo(request):
     context = {}
@@ -45,6 +46,7 @@ def product_view(request, product_id):
     context = {}
     producto = Producto.objects.get(id=product_id)
     context['producto'] = producto
+    cont = 0
     if request.user.is_authenticated:
         if Carrito.objects.filter(cliente_id=request.user.id).exists():
             carrito = Carrito.objects.get(cliente_id = request.user.id)
@@ -93,21 +95,6 @@ def mostrar_resultados_busqueda(request):
 def mostrar_carrito(request):
     return render(request, 'carrito.html')
 
-###########################################################
-#Vistas para pago de clientes registrados / no registrados#
-###########################################################
-
-# Vista para usuarios autenticados
-@login_required(login_url='/')
-def pago_usuario_registrado(request):
-    return render(request, 'pago_usuario_registrado.html')
-
-# Vista para usuarios no autenticados
-@user_passes_test(lambda user: not user.is_authenticated, login_url='/')
-def pago_usuario_no_registrado(request):
-    return render(request, 'pago_usuario_no_registrado.html')
-
-
 def agregar_al_carrito(request):
     if request.method == 'POST':
         producto_id = request.POST.get('producto_id')
@@ -148,3 +135,70 @@ def agregar_al_carrito(request):
 
     return redirect('/')
     
+
+# Método para usuarios registrados y no registrados
+def procesar_pago(request):
+    # Verificar si el usuario está autenticado
+    if request.user.is_authenticated:
+        # Usuario autenticado: Obtener o crear el carrito del usuario
+        carrito, created = Carrito.objects.get_or_create(cliente=request.user)
+        # Obtener los productos en el carrito
+        productos_en_carrito = carrito.itemcarrito_set.all()
+        # Configurar el email del cliente para Stripe
+        customer_email = request.user.email
+    else:
+        # Usuario no autenticado: Obtener o crear el carrito de la sesión
+        if 'carrito_id' not in request.session:
+            carrito = Carrito.objects.create()
+            request.session['carrito_id'] = carrito.id
+        else:
+            carrito_id = request.session['carrito_id']
+            carrito = get_object_or_404(Carrito, id=carrito_id)
+        # Obtener los productos en el carrito
+        productos_en_carrito = carrito.itemcarrito_set.all()
+        # Configurar el email del cliente para Stripe como None
+        customer_email = None
+
+    # Calcular el total del carrito
+    total_del_carrito = sum(item.producto.precio * item.cantidad for item in productos_en_carrito)
+
+   # Crear una sesión de pago en Stripe
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        customer_email=customer_email,
+        line_items=[
+            {
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {
+                        'name': item.producto.nombre,
+                    },
+                    'unit_amount': int(item.producto.precio * 100),
+                },
+                'quantity': item.cantidad,
+            } for item in productos_en_carrito
+        ],
+        mode='payment',
+        success_url=request.build_absolute_uri('/exito/'),
+        cancel_url=request.build_absolute_uri('/cancelado/'),
+    )
+    
+    # Renderizar la página de pago
+    template_name = 'pago_usuario_registrado.html' if request.user.is_authenticated else 'pago_usuario_no_registrado.html'
+    return render(request, template_name, {'session': session, 'productos_en_carrito': productos_en_carrito, 'total_del_carrito': total_del_carrito})
+
+# Vista para usuarios registrados
+@login_required(login_url='/login/')
+def pago_usuario_registrado(request):
+    return procesar_pago(request)
+
+# Vista para usuarios no autenticados
+@user_passes_test(lambda user: not user.is_authenticated, login_url='/')
+def pago_usuario_no_registrado(request):
+    return procesar_pago(request)
+
+def exito(request):
+    return render(request, 'exito.html')
+
+def cancelado(request):
+    return render(request, 'cancelado.html')

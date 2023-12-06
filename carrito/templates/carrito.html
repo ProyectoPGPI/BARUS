@@ -1,6 +1,8 @@
 {% load static %}
 {% block head %}
 <head>
+    <meta charset="UTF-8">
+    <title>Carrito</title>
     <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
     <link rel="stylesheet" href="/proyectopgpi/font-awesome-4.7.0/css/font-awesome.min.css">
@@ -13,38 +15,69 @@
 {% endblock %}
 
 {% block cuerpo %}
-<div class="container">
 
-    <h1>Carrito de {{ usuario }}</h1>
-    <!-- Mostrar los productos en el carrito -->
-    <ul class="list-group">
-        {% for item in carrito.itemcarrito_set.all %}
-        <li class="list-group-item">
-            {{ item.producto.nombre }} - {{ item.producto.precio }}
-            <form method="post" action="{% url 'actualizar_carrito' %}">
-                {% csrf_token %}
-                <input type="hidden" name="item_id" value="{{ item.id }}">
-                <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1">
-                <button class="btn btn-primary" type="submit">Actualizar</button>
-            </form>
-            <form method="post" action="{% url 'borrar_del_carrito' %}">
-                {% csrf_token %}
-                <input type="hidden" name="item_id" value="{{ item.id }}">
-                <button class="btn btn-danger" type="submit"><i class="fa fa-trash" aria-hidden="true"></i></button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
+<body>
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Barus</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Inicio</a>
+                    </li>
+                </ul>
+                {% if logueado %}
+                <span class="navbar-text">
+                    <a href="/authentication/logout-view"><button class="btn btn-secondary">Logout</button></a>
+                </span>
+                {% endif %}
+                {% if not logueado %}
+                <span class="navbar-text">
+                    <a href="/login/"><button class="btn btn-secondary">Login</button></a>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    <div class="container">
 
-    <div>Total: {{ carrito.total }}</div>
-    <!-- Otros detalles o funcionalidades del carrito -->
+        
 
-    <!-- Botones de acción -->
-    <a href="/"><button type="button" class="btn btn-secondary">Cerrar</button></a>
-    {% if user.is_authenticated %}
-        <a href="{% url 'pago_usuario_registrado' %}"><button type="button" class="btn btn-primary">Realizar Pedido</button></a>
-    {% else %}
-        <a href="{% url 'pago_usuario_no_registrado' %}"><button type="button" class="btn btn-primary">Realizar Pedido</button></a>
-    {% endif %}
-</div>
+        <h1>Carrito de {{ usuario }}</h1>
+        <!-- Mostrar los productos en el carrito -->
+        <ul class="list-group">
+            {% for item in carrito.itemcarrito_set.all %}
+            <li class="list-group-item">
+                {{ item.producto.nombre }} - {{ item.producto.precio }}
+                <form method="post" action="{% url 'actualizar_carrito' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1">
+                    <button class="btn btn-primary" type="submit">Actualizar</button>
+                </form>
+                <form method="post" action="{% url 'borrar_del_carrito' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <button class="btn btn-danger" type="submit"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div>Total: {{ carrito.total }} €</div>
+        <!-- Otros detalles o funcionalidades del carrito -->
+
+        <!-- Botones de acción -->
+        <a href="/"><button type="button" class="btn btn-secondary">Cerrar</button></a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'pagar' %}"><button type="button" class="btn btn-primary">Finalizar Pedido</button></a>
+        {% else %}
+            <a href="{% url 'pagar' %}"><button type="button" class="btn btn-primary">Finalizar Pedido</button></a>
+        {% endif %}
+    </div>
+</body>
 {% endblock%}

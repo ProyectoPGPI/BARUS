@@ -50,24 +50,23 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="nombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre completo"required>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
                     </div>
                     <div class="mb-3">
                         <label for="apellido" class="form-label">Apellidos</label>
-                        <input type="text" class="form-control" id="apellidos" name="apellidos" placeholder="Apellidos" required>
+                        <input type="text" class="form-control" id="apellidos" name="apellidos"  required>
                     </div>
                     <div class="mb-3">
-                        <label for="fecha_expiracion" class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="fecha_expiracion" name="fecha_expiracion"
-                            placeholder="MM/AA" required>
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="direccion" name="direccion" required>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="text" class="form-control" id="email" name="email" placeholder="exaple@gmail.com" required>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
                     <div class="mb-3">
                         <label for="telefono" class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" id="telefono" name="telefono" placeholder="+34 666 67 89 51" required>
+                        <input type="text" class="form-control" id="telefono" name="telefono" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Pagar</button>
                 </form>
