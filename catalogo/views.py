@@ -45,6 +45,7 @@ def product_view(request, product_id):
     context = {}
     producto = Producto.objects.get(id=product_id)
     context['producto'] = producto
+    cont = 0
     if request.user.is_authenticated:
         if Carrito.objects.filter(cliente_id=request.user.id).exists():
             carrito = Carrito.objects.get(cliente_id = request.user.id)
