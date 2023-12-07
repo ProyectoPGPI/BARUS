@@ -9,6 +9,9 @@ from django.shortcuts import get_object_or_404, redirect
 from .models import Producto
 from carrito.models import Carrito, ItemCarrito
 
+def contacto(request):
+    return render(request, 'contacto.html')
+
 def catalogo(request):
     context = {}
     opcion_seleccionada = 'general'
