@@ -1,13 +1,15 @@
 from .models import  Producto
 
-from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
 
-from django.shortcuts import get_object_or_404, redirect
 from .models import Producto
 from carrito.models import Carrito, ItemCarrito
+from django.conf import settings
+
+from django.shortcuts import render, redirect, reverse,\
+    get_object_or_404
 
 def catalogo(request):
     context = {}
@@ -148,4 +150,4 @@ def agregar_al_carrito(request):
         return redirect('/')  # Puedes cambiar esto a la URL de la página del carrito
 
     return redirect('/')
-    
+

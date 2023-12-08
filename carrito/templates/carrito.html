@@ -15,36 +15,80 @@
 {% block cuerpo %}
 <div class="container">
 
-    <h1>Carrito de {{ usuario }}</h1>
-    <!-- Mostrar los productos en el carrito -->
-    <ul class="list-group">
-        {% for item in carrito.itemcarrito_set.all %}
-        <li class="list-group-item">
-            {{ item.producto.nombre }} - {{ item.producto.precio }}
-            <form method="post" action="{% url 'actualizar_carrito' %}">
-                {% csrf_token %}
-                <input type="hidden" name="item_id" value="{{ item.id }}">
-                <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1">
-                <button class="btn btn-primary" type="submit">Actualizar</button>
-            </form>
-            <form method="post" action="{% url 'borrar_del_carrito' %}">
-                {% csrf_token %}
-                <input type="hidden" name="item_id" value="{{ item.id }}">
-                <button class="btn btn-danger" type="submit"><i class="fa fa-trash" aria-hidden="true"></i></button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
-
-    <div>Total: {{ carrito.total }}</div>
+    <div class="container mt-4">
+        <h1 class="mb-4">Carrito de {{ usuario }}</h1>
+    
+        <!-- Mostrar los productos en el carrito -->
+        <ul class="list-group">
+            {% for item in carrito.itemcarrito_set.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="font-weight-bold">{{ item.producto.nombre }}</span> -
+                    <span class="text-muted">{{ item.producto.precio }}</span>
+                </div>
+                <div class="input-group" style="width: 150px;">
+                    <form method="post" action="{% url 'actualizar_carrito' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_id" value="{{ item.id }}">
+                        <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" class="form-control">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-primary" type="submit">Actualizar</button>
+                        </div>
+                    </form>
+                    <form method="post" action="{% url 'borrar_del_carrito' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_id" value="{{ item.id }}">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-danger" type="submit"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    
+        <div class="mt-3">
+            <h5>Total: {{ carrito.total }}</h5>
+        </div>
+    </div>
+    
     <!-- Otros detalles o funcionalidades del carrito -->
+
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Detalles de la Dirección
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Nombre:</strong> {{ direccion.nombre }} {{ direccion.apellidos }}</li>
+                    <li class="list-group-item"><strong>Dirección:</strong> {{ direccion.direccion }}</li>
+                    <li class="list-group-item"><strong>Código Postal:</strong> {{ direccion.codigo_postal }}</li>
+                    <li class="list-group-item"><strong>Municipio:</strong> {{ direccion.municipio }}</li>
+                    <li class="list-group-item"><strong>Provincia:</strong> {{ direccion.provincia }}</li>
+                    <li class="list-group-item"><strong>Email:</strong> {{ direccion.email }}</li>
+                    <li class="list-group-item"><strong>Teléfono:</strong> {{ direccion.telefono }}</li>
+                </ul>
+            </div>
+            <div class="card-footer">
+                {% if direccion is None %}
+                    <a href="/direccion/"><button type="button" class="btn btn-warning">Crear Dirección</button></a>
+                {% else %}
+                    <a href="/direccion/"><button type="button" class="btn btn-warning">Modificar Dirección</button></a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
 
     <!-- Botones de acción -->
     <a href="/"><button type="button" class="btn btn-secondary">Cerrar</button></a>
-    {% if user.is_authenticated %}
-        <a href="{% url 'pago_usuario_registrado' %}"><button type="button" class="btn btn-primary">Realizar Pedido</button></a>
-    {% else %}
-        <a href="{% url 'pago_usuario_no_registrado' %}"><button type="button" class="btn btn-primary">Realizar Pedido</button></a>
-    {% endif %}
+    <form action="{% url 'carrito' %}" method="post">
+        <button type="submit" class="btn btn-primary"{% if direccion is None %} disabled {% endif %}>Realizar Pedido</button>
+        {% csrf_token %}
+    </form>
+    
+    
+    
 </div>
 {% endblock%}
