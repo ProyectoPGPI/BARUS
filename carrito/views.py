@@ -71,6 +71,7 @@ def payment_process(request):
     else:
         carrito_id = request.session.get('carrito_id', None)
     carrito = get_object_or_404(Carrito, id=carrito_id)
+    carrito.calcular_total()
     if request.method == 'POST':
         success_url = request.build_absolute_uri(reverse('completed'))
         cancel_url = request.build_absolute_uri(reverse('canceled'))
@@ -93,6 +94,17 @@ def payment_process(request):
             },
                 'quantity': item.cantidad,
             })
+        # Agregar los gastos de envío como un ítem separado
+        session_data['line_items'].append({
+            'price_data': {
+                'unit_amount': int(carrito.gastos_envio * float(Decimal('100'))),
+                'currency': 'eur',
+                'product_data': {
+                    'name': 'Gastos de Envío',
+                },
+            },
+            'quantity': 1,
+        })
         # create Stripe checkout session
         session = stripe.checkout.Session.create(**session_data)
         print(session)
