@@ -42,7 +42,15 @@
                     <div>
                         <div class="card-body">
                             <h3 class="card-title">{{ producto.nombre }}</h3>
-                            <p>{{ producto.precio }}€</p>
+                            <div class="row">
+                                <p class="col-9">{{ producto.precio }}€</p>
+                                <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center col-3">
+                                    {% csrf_token %}
+                                    <!-- Agregar campos ocultos o parámetros necesarios para identificar el producto -->
+                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                    <button type="submit" class="btn btn-warning text-center" title="Añadir al carrito"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
