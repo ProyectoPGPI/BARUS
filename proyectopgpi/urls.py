@@ -25,6 +25,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/',LogoutView.as_view(template_name='logout.html'),name='logout'),
     path('authentication/',include('authentication.urls')),
+    path('contacto', views.contacto, name='contacto'),
     path('',include('carrito.urls')),
     path('',include('catalogo.urls')),
 ]

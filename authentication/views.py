@@ -9,9 +9,14 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
+from carrito.models import Carrito
+
 from .forms import EmailAuthenticationForm
 
 # Create your views here.
+
+def contacto(request):
+    return render(request, 'contacto.html')
 
 def signup(request):
     if request.method == 'GET':
