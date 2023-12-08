@@ -1,7 +1,8 @@
-# pgpi
-*.pyc
+# Ignorar archivos de caché de Python
 __pycache__/
-
+*.pyc
+*.pyo
+*.pyd
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
