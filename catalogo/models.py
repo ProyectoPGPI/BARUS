@@ -17,6 +17,7 @@ class Producto(models.Model):
     avalible = models.BooleanField(default=True)
     departamento = models.CharField(max_length=50)
     fabricante = models.CharField(max_length=50)
+    stock = models.IntegerField(default= 0)
     
     def __str__(self):
         return self.nombre
