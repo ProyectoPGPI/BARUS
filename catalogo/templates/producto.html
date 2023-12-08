@@ -3,11 +3,14 @@
 
 {% block contenido %}
 <body>
-    <div class="container mt-5">
+    <div class="container">
+        <h2 class="text-center" style="margin-top: 25px;">DETALLES DEL PRODUCTO</h1>
+        <hr>
         <div class="row">
-            <div class="col-md-6 mb-5"> 
+            <div class="col-2"></div>
+            <div class="col-4"> 
                 <a href="/producto/{{ producto.pk }}" style="text-decoration: none;">
-                    <div class="card" style="padding-left: 0; padding-right: 0;">
+                    <div class="card" style="padding-left: 0; padding-right: 0; max-width: 480px;">
                         {% if producto.imagen %}
                         <div class="mx-auto img-fluid"
                             style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
@@ -31,17 +34,20 @@
                     </div>
                 </a>
             </div>
-
-            <div class="col-md-6">
-                <div>
-                    <h4>Opiniones:</h4>
-                    {% for opinion in opiniones %}
-                    <ul>
-                        <li>{{ opinion.usuario.username }} dijo: {{ opinion.comentario }}</li>
-                    </ul>
-                        
-                    {% endfor %}
-                </div>
+            <div class="col-1"></div>
+            <div class="col-4 d-flex flex-column justify-content-start"> <!-- Añadido d-flex, flex-column, y justify-content-start -->
+                <h4>Opiniones:</h4>
+                {% if opiniones %}
+                    <div>
+                        {% for opinion in opiniones %}
+                        <ul>
+                            <li>{{ opinion.usuario.username }} dijo: {{ opinion.comentario }}</li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No hay opiniones para este producto todavía.</p>
+                {% endif %}
 
                 {% if user.is_authenticated %}
                     <div>
@@ -54,7 +60,7 @@
                         </form>
                     </div>
                 {% else %}
-                    <p class="mt-3">Inicia sesión para dejar una opinión.</p>
+                    <p>Inicia sesión para dejar una opinión.</p>
                 {% endif %}
             </div>
         </div>
