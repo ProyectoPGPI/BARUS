@@ -123,7 +123,20 @@ def pago_usuario_no_registrado(request):
 def agregar_al_carrito(request):
     if request.method == 'POST':
         producto_id = request.POST.get('producto_id')
-        cantidad = 1
+        print(request.POST.get('cantidad', 1)+"QUE PAZA PICHA")
+        
+        if request.POST.get('cantidad', 1) == '':
+            cantidad = 1
+        else:
+            cantidad = int(request.POST.get('cantidad', 1))
+        
+
+        # Validación: si no se proporciona cantidad o está vacía, se establece como 1
+        producto = get_object_or_404(Producto, pk=producto_id)
+        stock_disponible = producto.stock
+
+        # Validar la cantidad introducida
+        cantidad = min(cantidad, stock_disponible)
 
         if request.user.is_authenticated:
             # Usuario autenticado, usar base de datos
@@ -144,8 +157,9 @@ def agregar_al_carrito(request):
         item_carrito, item_created = ItemCarrito.objects.get_or_create(
             carrito=carrito,
             producto=producto,
-            defaults={'cantidad': 1}  # Establecer la cantidad a 1 si es la primera vez que se agrega
+            defaults={'cantidad': cantidad}  # Establecer la cantidad predeterminada si es la primera vez que se agrega
         )
+        
 
         # Si el producto ya está en el carrito, incrementar la cantidad
         if not item_created:

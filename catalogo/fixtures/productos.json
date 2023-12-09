@@ -11,7 +11,8 @@
             "imagen": "1.jpeg",
             "avalible": true,
             "departamento": "cocina",
-            "fabricante": "Bosh"
+            "fabricante": "Bosh",
+            "stock" :10
         }
     },
     {
@@ -26,7 +27,8 @@
             "imagen": "2.jpeg",
             "avalible": true,
             "departamento": "cocina",
-            "fabricante": "Bosh"
+            "fabricante": "Bosh",
+            "stock" :20
         }
     },{
         "model": "catalogo.producto",
@@ -40,7 +42,23 @@
             "imagen": "3.jpg",
             "avalible": true,
             "departamento": "cocina",
-            "fabricante": "Bosh"
+            "fabricante": "Bosh",
+            "stock" :4
         }
+    },{
+        "model": "catalogo.producto",
+        "pk": 4,
+        "fields": {
+            "nombre": "Producto 4",
+            "precio": 99.99,
+            "descripcion": "Descripción del Producto 3",
+            "fecha_registro": "2023-11-18",
+            "tipo_seccion": "interior",
+            "imagen": "3.jpg",
+            "avalible": true,
+            "departamento": "cocina",
+            "fabricante": "Bosh",
+            "stock" :0
     }
+}
 ]

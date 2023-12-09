@@ -20,7 +20,7 @@
                     <form method="post" action="{% url 'actualizar_carrito' %}">
                         {% csrf_token %}
                         <input type="hidden" name="item_id" value="{{ item.id }}">
-                        <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" class="form-control">
+                        <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" max = "{{item.producto.stock}}" class="form-control">
                         <div class="input-group-append">
                             <button class="btn btn-outline-primary" type="submit">Actualizar</button>
                         </div>
@@ -92,4 +92,16 @@
     </div>
     
 </div>
-{% endblock%}
+
+<script>
+    function actualizarMax(input) {
+        var stock = parseFloat(input.getAttribute('data-stock'));
+        var id = input.id.split('_')[1]; // Obtener el ID del elemento
+
+        var cantidadActual = parseFloat(input.value);
+        var campoCantidad = document.getElementById('cantidad_' + id);
+        campoCantidad.setAttribute('max', stock + cantidadActual);
+    }
+</script>
+
+{% endblock %}
