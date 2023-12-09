@@ -27,6 +27,12 @@ def signup(request):
         username = request.POST['username']
         password1 = request.POST['password1']
         password2 = request.POST['password2']
+        email = request.POST['email']
+
+        # Verificar si el correo electrónico ya está en uso
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'El correo está ya en uso.')
+            return render(request, 'signup.html')
 
         if password1 == password2:
             try:
@@ -35,16 +41,16 @@ def signup(request):
                     username=username,
                     first_name=request.POST['first_name'],
                     last_name=request.POST['last_name'],
-                    email=request.POST['email'],
+                    email=email,
                     password=password1
                 )
                 user.save()
                 return redirect('login')
             
             except Exception as e:
-                messages.error(request, f'Error creating user: {str(e)}')
+                messages.error(request, f'Error creando el usuario: {str(e)}')
         else:
-            messages.error(request, 'Passwords do not match')
+            messages.error(request, 'Las contraseñas no coinciden')
 
     # Si hay un error o la contraseña no coincide, permanece en la página de registro y conserva los datos del formulario.
     return render(request, 'signup.html')
@@ -88,8 +94,8 @@ def reclamaciones(request):
     if request.method == 'POST':
         titulo = request.POST.get('titulo')
         descripcion = request.POST.get('descripcion')
-        Reclamacion.objects.create(titulo=titulo, descripcion=descripcion, estado='pendiente', usuario=request.user)
-        
+        Reclamacion.objects.create(titulo=titulo, descripcion=descripcion, estado='Pendiente', usuario=request.user)
+        return redirect('reclamaciones')  # Redirige para evitar reenvío del formulario al recargar la página
 
     reclamaciones = Reclamacion.objects.filter(usuario=request.user)
     return render(request, 'reclamaciones.html', {'reclamaciones': reclamaciones})

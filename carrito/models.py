@@ -42,6 +42,12 @@ class Direccion(models.Model):
     telefono = models.CharField(max_length=15)
 
 class Pedido(models.Model):
+    ESTADOS = (
+        ('Aceptado', 'Aceptado'),
+        ('En camino', 'En_camino'),
+        ('Entregado', 'Entregado'),
+    )
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
     direccion = models.ForeignKey(Direccion, on_delete=models.CASCADE)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='Aceptado')
 
