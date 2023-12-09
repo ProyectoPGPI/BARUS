@@ -23,10 +23,10 @@ def carrito(request):
         ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
         Carrito.objects.filter(cliente_id=request.user.id).exclude(id=ultimo_carrito).delete()
         if 'carrito_id' not in request.session:
-             carrito = Carrito.objects.get(cliente_id=request.user.id)
-             carrito.productos.clear()
-             carrito.calcular_total()
-             carrito.save()
+            carrito = Carrito.objects.get(cliente_id=request.user.id)
+            carrito.productos.clear()
+            carrito.calcular_total()
+            carrito.save()
         context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
         if 'direccion_data' in request.session:
             context['direccion'] = request.session['direccion_data']
