@@ -64,7 +64,39 @@
                 {% endif %}
             </div>
         </div>
+<<<<<<< HEAD
+    </nav>
+    <div class="d-flex row justify-content-center mx-auto align-items-center" style="height: calc(100vh - 70px);">
+        <a class="col-3" href="/producto/{{ producto.pk }}" style="text-decoration: none;">
+            <div class="card" style="padding-left: 0; padding-right: 0;">
+                {% if producto.imagen %}
+                <div class="mx-auto"
+                    style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
+                </div>
+                {% endif %}
+                <div>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ producto.nombre }}</h3>
+                        <p class="card-text">{{ producto.descripcion }}</p>
+                        <p class="card-text">{{ producto.precio }}€ + gastos de envío</p>
+                        <span class="badge bg-secondary">{{ producto.departamento }}</span>
+                        <span class="badge bg-secondary">{{ producto.fabricante }}</span>
+                        <span class="badge bg-secondary">{{ producto.tipo_seccion }}</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center" style="margin-bottom: 20px;">
+            {% csrf_token %}
+            <!-- Agregar campos ocultos o parámetros necesarios para identificar el producto -->
+            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+            <button type="submit" class="btn btn-warning text-center">Agregar al Carrito</button>
+        </form>
+    </div>    
+
+=======
     </div>
+>>>>>>> 869fe89fd50fae3ff6271e4069ffa2f01db1d426
 </body>
 {% endblock %}
 </html>

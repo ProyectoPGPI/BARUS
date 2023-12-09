@@ -141,3 +141,7 @@ AUTHENTICATION_BACKENDS = [
     # Otros backends...
     'authentication.Email_auth_backend.EmailAuthBackend',
 ]
+
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51OKJOnItQWOA5nomxpkUiiHHx2Kn9hwpp6M4WZf4eLklNuOaE8exes876qHYFqWDnhnbEpXJaFMo8GpogqzgEezd00KhAU7v5N' # Publishable key
+STRIPE_SECRET_KEY = 'sk_test_51OKJOnItQWOA5nom8XRDsMMYGM7xDGNZ8OSnfwX8nUsKeQqMSEnTD9za1J2LGyCg4mEmn5D0EHNsTGTAjbBnSiQK00nUkYai1J' # Secret key
+STRIPE_API_VERSION = '2022-08-01'
