@@ -73,7 +73,7 @@ def payment_process(request):
     carrito = get_object_or_404(Carrito, id=carrito_id)
     carrito.calcular_total()
     if request.method == 'POST':
-        success_url = request.build_absolute_uri(reverse('completed'))
+        success_url = request.build_absolute_uri(reverse('mis_pedidos'))
         cancel_url = request.build_absolute_uri(reverse('canceled'))
     # Stripe checkout session data
         session_data = {
@@ -125,7 +125,7 @@ def payment_completed(request):
         carrito = carro,
         direccion = dire
     )
-    return render(request,'exito.html')
+    return render(request,'mis_pedidos.html')
 
 def payment_canceled(request):
     return render(request,'cancelado.html')

@@ -1,5 +1,9 @@
-{% block title %}Payment canceled{% endblock %}
-{% block content %}
- <h1>Your payment has not been processed</h1>
- <p>There was a problem processing your payment.</p>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+ <h1>Tu pago no ha sido procesado</h1>
+ <p>Hubo un problema procesando el pedido.</p>
 {% endblock %}
+
+<a href="/"><button type="button" class="btn btn-secondary">Volver</button></a>
