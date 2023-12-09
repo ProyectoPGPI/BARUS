@@ -18,7 +18,10 @@
                             {{ item.producto.nombre }} - Cantidad: {{ item.cantidad }}
                         </li>
                     {% endfor %}
+                    <br>
+                    <p><strong>Estado del pedido: </strong> {{ pedido.estado }}</p>
                 </ul>
+
             </div>
             <div class="card-footer">
                 <h6>Dirección de Envío:</h6>
