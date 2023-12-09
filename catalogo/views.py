@@ -1,4 +1,5 @@
-from .models import  Producto
+from catalogo.forms import OpinionForm
+from .models import  Opinion, Producto
 
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,10 @@ from django.conf import settings
 
 from django.shortcuts import render, redirect, reverse,\
     get_object_or_404
+from django.urls import reverse
+
+def contacto(request):
+    return render(request, 'contacto.html')
 
 def catalogo(request):
     context = {}
@@ -48,6 +53,10 @@ def product_view(request, product_id):
     producto = Producto.objects.get(id=product_id)
     context['producto'] = producto
     cont = 0
+
+    opiniones = Opinion.objects.filter(producto=producto)
+    context['opiniones'] = opiniones
+    
     if request.user.is_authenticated:
         if Carrito.objects.filter(cliente_id=request.user.id).exists():
             carrito = Carrito.objects.get(cliente_id = request.user.id)
@@ -150,4 +159,24 @@ def agregar_al_carrito(request):
         return redirect('/')  # Puedes cambiar esto a la URL de la página del carrito
 
     return redirect('/')
+
+def agregar_opinion(request):
+    if request.method == 'POST':
+        form = OpinionForm(request.POST)
+        if form.is_valid():
+            nueva_opinion = form.save(commit=False)
+
+            # Asignar el usuario solo si está autenticado
+            if request.user.is_authenticated:
+                nueva_opinion.usuario = request.user
+
+            nueva_opinion.producto = Producto.objects.get(id=request.POST['producto_id'])
+            nueva_opinion.save()
+
+            # Ajusta la redirección aquí
+            product_id = request.POST['producto_id']
+            return redirect(reverse('product_view', args=[product_id]))
+
+    # En caso de que el formulario no sea válido o no sea una solicitud POST
+    return redirect('/')  # Puedes cambiar esto a la URL adecuada
 

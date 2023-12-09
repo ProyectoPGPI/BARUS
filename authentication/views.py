@@ -9,9 +9,15 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
+from carrito.models import Carrito
+from .models import Reclamacion 
+
 from .forms import EmailAuthenticationForm
 
 # Create your views here.
+
+def contacto(request):
+    return render(request, 'contacto.html')
 
 def signup(request):
     if request.method == 'GET':
@@ -77,3 +83,13 @@ def logout_view(request):
         logout(request)
         response.delete_cookie('token')
     return response
+
+def reclamaciones(request):
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo')
+        descripcion = request.POST.get('descripcion')
+        Reclamacion.objects.create(titulo=titulo, descripcion=descripcion, estado='pendiente', usuario=request.user)
+        
+
+    reclamaciones = Reclamacion.objects.filter(usuario=request.user)
+    return render(request, 'reclamaciones.html', {'reclamaciones': reclamaciones})

@@ -1,48 +1,70 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
 
-{% block head %}
-<head>
-    <meta charset="UTF-8">
-    <title>Producto</title>
-    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" src="{% static 'producto/producto.css' %}" />
-    <link rel="stylesheet" href="/proyectopgpi/font-awesome-4.7.0/css/font-awesome.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-        crossorigin="anonymous"></script>
-
-</head>
-{% endblock %}
-{% block cuerpo %}
+{% block contenido %}
 <body>
-    <nav class="navbar navbar-expand-lg bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">Barus</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
-                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarText">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Inicio</a>
-                    </li>
-                </ul>
-                <a href="/carrito"><button type="button" class="btn btn-primary position-relative" style="margin-right: 10px;">
-                    <i class="fa fa-shopping-cart" aria-hidden="true"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                      {{ num_productos_carrito }}
-                    </span>
-                  </button>
+    <div class="container">
+        <h2 class="text-center" style="margin-top: 25px;">DETALLES DEL PRODUCTO</h1>
+        <hr>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-4"> 
+                <a href="/producto/{{ producto.pk }}" style="text-decoration: none;">
+                    <div class="card" style="padding-left: 0; padding-right: 0; max-width: 480px;">
+                        {% if producto.imagen %}
+                        <div class="mx-auto img-fluid"
+                            style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ producto.nombre }}</h3>
+                                <p class="card-text">{{ producto.descripcion }}</p>
+                                <p class="card-text">{{ producto.precio }}€</p>
+                                <span class="badge bg-secondary">{{ producto.departamento }}</span>
+                                <span class="badge bg-secondary">{{ producto.fabricante }}</span>
+                                <span class="badge bg-secondary">{{ producto.tipo_seccion }}</span>
+                                <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                    <button type="submit" class="btn btn-warning">Agregar al Carrito</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </a>
-                <span class="navbar-text" v-if="!signup">
-                    <a href="/authentication/logout-view"><button class="btn btn-secondary">Logout</button></a>
-                </span>
+            </div>
+            <div class="col-1"></div>
+            <div class="col-4 d-flex flex-column justify-content-start"> <!-- Añadido d-flex, flex-column, y justify-content-start -->
+                <h4>Opiniones:</h4>
+                {% if opiniones %}
+                    <div>
+                        {% for opinion in opiniones %}
+                        <ul>
+                            <li>{{ opinion.usuario.username }} dijo: {{ opinion.comentario }}</li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No hay opiniones para este producto todavía.</p>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                    <div>
+                        <h4>Añadir Opinión:</h4>
+                        <form method="POST" action="{% url 'agregar_opinion' %}">
+                            {% csrf_token %}
+                            <textarea name="comentario" rows="4" cols="50" placeholder="Escribe tu opinión aquí..."></textarea>
+                            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                            <button type="submit" class="btn btn-primary mt-2">Enviar Opinión</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>Inicia sesión para dejar una opinión.</p>
+                {% endif %}
             </div>
         </div>
+<<<<<<< HEAD
     </nav>
     <div class="d-flex row justify-content-center mx-auto align-items-center" style="height: calc(100vh - 70px);">
         <a class="col-3" href="/producto/{{ producto.pk }}" style="text-decoration: none;">
@@ -72,6 +94,9 @@
         </form>
     </div>    
 
+=======
+    </div>
+>>>>>>> 869fe89fd50fae3ff6271e4069ffa2f01db1d426
 </body>
-{% endblock%}
+{% endblock %}
 </html>

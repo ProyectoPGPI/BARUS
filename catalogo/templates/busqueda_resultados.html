@@ -1,30 +1,36 @@
-<!--#####################################################################################
-    #Este HTML muestra los archivos obtenidos tras filtrar los productos en la búsqueda.#
-    #####################################################################################-->
+{% extends 'base.html' %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Resultados de Búsqueda</title>
-</head>
+{% block contenido %}
 <body>
-    <h1>Resultados de Búsqueda</h1>
-
-    {% if productos %}
-        <ul>
-            {% for producto in productos %}
-                <li>
-                    <h3>{{ producto.nombre }}</h3>
-                    <p>Precio: {{ producto.precio }}</p>
-                    {% if producto.imagen %}
-                        <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}">
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No se encontraron productos que coincidan con la búsqueda.</p>
-    {% endif %}
+    <div class="container">
+        <h1 class="text-center" style="margin-top: 25px;">RESULTADOS DE LA BÚSQUEDA</h1>
+        <hr />
+        {% if productos %}
+            <div class="row justify-content-around">
+                {% for producto in productos %}
+                <a class="col-3" href="/producto/{{ producto.pk }}" style="text-decoration: none;">
+                    <div class="card" style="padding-left: 0; padding-right: 0;">
+                        {% if producto.imagen %}
+                        <div class="mx-auto"
+                            style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ producto.nombre }}</h3>
+                                <p>{{ producto.precio }}€</p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No se encontraron productos que coincidan con la búsqueda.</p>
+        {% endif %}
+    </div>
 </body>
 </html>
+{% endblock %}
+
