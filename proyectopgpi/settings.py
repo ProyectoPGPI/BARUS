@@ -152,13 +152,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'fbarroso2001@gmail.com'  # Reemplaza con tu dirección de correo
-EMAIL_HOST_PASSWORD = 'contraseña'  # Reemplaza con tu contraseña de correo
+EMAIL_HOST_USER = 'baruspgpi@gmail.com'  # Reemplaza con tu dirección de correo
+EMAIL_HOST_PASSWORD = 'uxbs yhje lgai rrkc'  # Reemplaza con tu contraseña de correo
 
-# Configuración adicional para enviar correos
-DEFAULT_FROM_EMAIL = 'fbarroso2001@gmail.com'  # Reemplaza con tu dirección de correo
-SERVER_EMAIL = 'contraseña'  # Reemplaza con tu dirección de correo
+DEFAULT_FROM_EMAIL = 'baruspgpi@gmail.com'  # Reemplaza con tu dirección de correo
+SERVER_EMAIL = 'baruspgpi@gmail.com'
 
-# Configuración para imprimir correos en la consola en desarrollo (opcional)
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

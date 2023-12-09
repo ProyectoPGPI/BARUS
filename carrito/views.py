@@ -138,13 +138,28 @@ def payment_completed(request):
 
 def enviar_correo_confirmacion(carrito, direccion):
     subject = 'Confirmación de pedido'
+    
+    # Construir el cuerpo del mensaje con los detalles del pedido
     message = f'Tu pedido ha sido confirmado. Detalles:\n\n'
-    message += f'Productos: {", ".join([item.producto.nombre for item in carrito.itemcarrito_set.all()])}\n'
-    message += f'Total: {carrito.total}\n'
-    message += f'Dirección de entrega: {direccion}\n'
+    
+    for item in carrito.itemcarrito_set.all():
+        message += f'Producto: {item.producto.nombre}\n' + f'Cantidad: {item.cantidad}\n'
+        message += f'Precio unitario: {item.producto.precio} EUR\n'
+        message += f'Precio unitario: {item.gastos_envio} EUR\n'
+    
+    message += f'Total del pedido: {carrito.total} EUR\n\n'
+    
+    message += f'Dirección de entrega:\n'
+    message += f'Nombre: {direccion.nombre} {direccion.apellidos}\n'
+    message += f'Dirección: {direccion.direccion}\n'
+    message += f'Código Postal: {direccion.codigo_postal}\n'
+    message += f'Municipio: {direccion.municipio}\n'
+    message += f'Provincia: {direccion.provincia}\n'
+    message += f'Email: {direccion.email}\n'
+    message += f'Teléfono: {direccion.telefono}\n'
 
     # Enviar el correo electrónico
-    send_mail(subject, message, 'fbarroso2001@gmail.com', [direccion.email])
+    send_mail(subject, message, 'baruspgpi@gmail.com', [direccion.email])
 
 def payment_canceled(request):
     return render(request,'cancelado.html')
