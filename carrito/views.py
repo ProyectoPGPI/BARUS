@@ -129,7 +129,8 @@ def payment_completed(request):
         carrito = carro,
         direccion = dire
     )
-    return mis_pedidos(request)
+    mis_pedidos(request)
+    return redirect('mis_pedidos')
 
 def payment_canceled(request):
     return render(request,'cancelado.html')
