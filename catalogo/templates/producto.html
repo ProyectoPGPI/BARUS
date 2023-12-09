@@ -3,24 +3,36 @@
 
 {% block contenido %}
 <body>
-    <div class="d-flex row justify-content-center mx-auto align-items-center" style="height: calc(100vh - 70px);">
-        <a class="col-3" href="/producto/{{ producto.pk }}" style="text-decoration: none;">
-            <div class="card" style="padding-left: 0; padding-right: 0;">
-                {% if producto.imagen %}
-                <div class="mx-auto"
-                    style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
-                </div>
-                {% endif %}
-                <div>
-                    <div class="card-body">
-                        <h3 class="card-title">{{ producto.nombre }}</h3>
-                        <p class="card-text">{{ producto.descripcion }}</p>
-                        <p class="card-text">{{ producto.precio }}€</p>
-                        <span class="badge bg-secondary">{{ producto.departamento }}</span>
-                        <span class="badge bg-secondary">{{ producto.fabricante }}</span>
-                        <span class="badge bg-secondary">{{ producto.tipo_seccion }}</span>
+    <div class="container">
+        <h2 class="text-center" style="margin-top: 25px;">DETALLES DEL PRODUCTO</h1>
+        <hr>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-4"> 
+                <a href="/producto/{{ producto.pk }}" style="text-decoration: none;">
+                    <div class="card" style="padding-left: 0; padding-right: 0; max-width: 480px;">
+                        {% if producto.imagen %}
+                        <div class="mx-auto img-fluid"
+                            style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ producto.nombre }}</h3>
+                                <p class="card-text">{{ producto.descripcion }}</p>
+                                <p class="card-text">{{ producto.precio }}€</p>
+                                <span class="badge bg-secondary">{{ producto.departamento }}</span>
+                                <span class="badge bg-secondary">{{ producto.fabricante }}</span>
+                                <span class="badge bg-secondary">{{ producto.tipo_seccion }}</span>
+                                <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center mt-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                    <button type="submit" class="btn btn-warning">Agregar al Carrito</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </a>
         {% if producto.stock > 0 %}
@@ -34,7 +46,36 @@
         <span class="badge rounded-pill bg-danger" style="font-size: medium;">Sin stock</span> 
         {%endif%}
     </div>    
+            <div class="col-1"></div>
+            <div class="col-4 d-flex flex-column justify-content-start"> 
+                <h4>Opiniones:</h4>
+                {% if opiniones %}
+                    <div>
+                        {% for opinion in opiniones %}
+                        <ul>
+                            <li>{{ opinion.usuario.username }} dijo: {{ opinion.comentario }}</li>
+                        </ul>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No hay opiniones para este producto todavía.</p>
+                {% endif %}
 
+                {% if user.is_authenticated %}
+                    <div>
+                        <h4>Añadir Opinión:</h4>
+                        <form method="POST" action="{% url 'agregar_opinion' %}">
+                            {% csrf_token %}
+                            <textarea name="comentario" rows="4" cols="50" placeholder="Escribe tu opinión aquí..."></textarea>
+                            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                            <button type="submit" class="btn btn-primary mt-2">Enviar Opinión</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>Inicia sesión para dejar una opinión.</p>
+                {% endif %}
+            </div>
+        </div>
 </body>
-{% endblock%}
+{% endblock %}
 </html>

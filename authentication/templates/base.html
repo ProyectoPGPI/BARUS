@@ -32,6 +32,14 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{% url 'contacto' %}">Contacto</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'mis_pedidos' %}">Mis pedidos</a>
+                    </li>
+                    {% if logueado %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'reclamaciones' %}">Reclamaciones</a>
+                    </li>
+                    {% endif %}
                 </ul>
                 <a href="/carrito"><button type="button" class="btn btn-primary position-relative" style="margin-right: 10px;">
                     <i class="fa fa-shopping-cart" aria-hidden="true"></i>
