@@ -4,6 +4,7 @@ from django.template import loader
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.http import Http404
+from django.core.mail import send_mail
 
 from django.shortcuts import redirect
 from .models import Carrito, ItemCarrito, Pedido, Direccion
@@ -129,8 +130,21 @@ def payment_completed(request):
         carrito = carro,
         direccion = dire
     )
+
+    enviar_correo_confirmacion(carro, dire)
+
     mis_pedidos(request)
     return redirect('mis_pedidos')
+
+def enviar_correo_confirmacion(carrito, direccion):
+    subject = 'Confirmación de pedido'
+    message = f'Tu pedido ha sido confirmado. Detalles:\n\n'
+    message += f'Productos: {", ".join([item.producto.nombre for item in carrito.itemcarrito_set.all()])}\n'
+    message += f'Total: {carrito.total}\n'
+    message += f'Dirección de entrega: {direccion}\n'
+
+    # Enviar el correo electrónico
+    send_mail(subject, message, 'fbarroso2001@gmail.com', [direccion.email])
 
 def payment_canceled(request):
     return render(request,'cancelado.html')
