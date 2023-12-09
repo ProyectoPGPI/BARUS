@@ -4,6 +4,7 @@ from django.template import loader
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.http import Http404
+from django.core.mail import send_mail
 
 from django.shortcuts import redirect
 from .models import Carrito, ItemCarrito, Pedido, Direccion
@@ -129,8 +130,36 @@ def payment_completed(request):
         carrito = carro,
         direccion = dire
     )
+
+    enviar_correo_confirmacion(carro, dire)
+
     mis_pedidos(request)
     return redirect('mis_pedidos')
+
+def enviar_correo_confirmacion(carrito, direccion):
+    subject = 'Confirmación de pedido'
+    
+    # Construir el cuerpo del mensaje con los detalles del pedido
+    message = f'Tu pedido ha sido confirmado. Detalles:\n\n'
+    
+    for item in carrito.itemcarrito_set.all():
+        message += f'Producto: {item.producto.nombre}\n' + f'Cantidad: {item.cantidad}\n'
+        message += f'Precio unitario: {item.producto.precio} EUR\n'
+        message += f'Precio unitario: {item.gastos_envio} EUR\n'
+    
+    message += f'Total del pedido: {carrito.total} EUR\n\n'
+    
+    message += f'Dirección de entrega:\n'
+    message += f'Nombre: {direccion.nombre} {direccion.apellidos}\n'
+    message += f'Dirección: {direccion.direccion}\n'
+    message += f'Código Postal: {direccion.codigo_postal}\n'
+    message += f'Municipio: {direccion.municipio}\n'
+    message += f'Provincia: {direccion.provincia}\n'
+    message += f'Email: {direccion.email}\n'
+    message += f'Teléfono: {direccion.telefono}\n'
+
+    # Enviar el correo electrónico
+    send_mail(subject, message, 'baruspgpi@gmail.com', [direccion.email])
 
 def payment_canceled(request):
     return render(request,'cancelado.html')

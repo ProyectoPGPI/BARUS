@@ -14,7 +14,7 @@
                 <div>
                     <span class="font-weight-bold">{{ item.cantidad }} unidad/es de </span>
                     <span class="font-weight-bold">{{ item.producto.nombre }}</span> -
-                    <span class="text-muted">{{ item.producto.precio }}€</span>
+                    <span class="text-muted">{{ item.producto.precio }}€/unidad</span>
                 </div>
                 <div class="input-group" style="width: 150px;">
                     <form method="post" action="{% url 'actualizar_carrito' %}">
