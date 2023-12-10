@@ -6,11 +6,14 @@
     <h2>Listado de Pedidos</h2>
     <hr>
     <form method="GET" action="{% url 'buscar_pedidos' %}">
-        <div class="form-group">
-            <label for="numero_pedido">Buscar por número de pedido:</label>
+        {% csrf_token %}
+        <label for="numero_pedido">Buscar por número de pedido:</label>
+        <div class="input-group">
             <input type="text" class="form-control" id="numero_pedido" name="numero_pedido">
+            <button class="btn btn-primary" type="submit">
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </button>
         </div>
-        <button type="submit" class="btn btn-primary mt-1 mb-2">Buscar</button>
     </form>
     <hr>
     {% for pedido in pedidos %}

@@ -18,6 +18,8 @@ from django.shortcuts import render, redirect, reverse,\
     get_object_or_404
 import random
 import string
+from django.contrib import messages
+
 
 # Create your views here.
 
@@ -277,15 +279,15 @@ def mis_pedidos(request):
 
     return render(request, 'mis_pedidos.html', context)
 
-@login_required(login_url='/login/')  # Redirige a la página de inicio de sesión si el usuario no está autenticado
 def buscar_pedidos(request):
     numero_pedido = request.GET.get('numero_pedido', '')
     
     if request.user.is_authenticated:
-        # Filtra los pedidos por número de pedido para usuarios autenticados
-        pedidos = Pedido.objects.filter(num_de_pedido__icontains=numero_pedido)
+        pedidos = Pedido.objects.filter(direccion__cliente=request.user, num_de_pedido__icontains=numero_pedido)
     else:
-        # Si el usuario no está autenticado, solo muestra el formulario de búsqueda
-        return render(request, 'buscar_pedidos.html', {'numero_pedido': numero_pedido})
+        if numero_pedido:
+            pedidos = Pedido.objects.filter(direccion__cliente__isnull=True, num_de_pedido__icontains=numero_pedido)
+        else:
+            pedidos = []
 
     return render(request, 'mis_pedidos.html', {'pedidos': pedidos, 'numero_pedido': numero_pedido})
