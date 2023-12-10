@@ -81,11 +81,20 @@
     
     <br>
 
+   
+
     <!-- Botones de acción -->
     <div class="row mb-4">
         <div class="d-flex justify-content-center align-items-center">
             <form action="{% url 'carrito' %}" method="post">
-                <button type="submit" class="btn btn-primary"{% if direccion is None %} disabled {% endif %}>Realizar Pedido</button>
+                <div class="form-group">
+                    <label for="metodo_pago">Método de pago:</label>
+                    <select id="metodo_pago" name="metodo_pago" class="form-control" required>
+                        <option value="Tarjeta">Tarjeta</option>
+                        <option value="Contra reembolso">Contra reembolso</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3"{% if direccion is None or carrito.productos.count == 0   %} disabled {% endif %}>Realizar Pedido</button>
                 {% csrf_token %}
             </form>
         </div>

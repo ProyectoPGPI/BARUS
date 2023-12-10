@@ -4,11 +4,24 @@
 {% block contenido %}
 <div class="container mt-4">
     <h2>Listado de Pedidos</h2>
-
+    <hr>
+    <form method="GET" action="{% url 'buscar_pedidos' %}">
+        {% csrf_token %}
+        <label for="numero_pedido">Buscar por número de pedido:</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="numero_pedido" name="numero_pedido">
+            <button class="btn btn-primary" type="submit">
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </button>
+        </div>
+    </form>
+    <hr>
     {% for pedido in pedidos %}
         <div class="card mb-4">
             <div class="card-header">
-                Pedido #{{ pedido.id }}
+                <p>Pedido #{{ pedido.id }}</p>
+                <p>Número de pedido #{{ pedido.num_de_pedido }}</p>
+                
             </div>
             <div class="card-body">
                 <h5 class="card-title">Productos en el pedido:</h5>
@@ -19,6 +32,7 @@
                         </li>
                     {% endfor %}
                     <br>
+                    <p><strong>Método de pago: </strong> {{ pedido.metodo_pago }}</p>
                     <p><strong>Estado del pedido: </strong> {{ pedido.estado }}</p>
                 </ul>
 

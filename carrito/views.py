@@ -10,32 +10,36 @@ from django.shortcuts import redirect
 from .models import Carrito, ItemCarrito, Pedido, Direccion
 from django.db.models import Max
 from django.db.models import F
+from django.contrib.auth.decorators import login_required
 
 from decimal import Decimal
 import stripe
 from django.shortcuts import render, redirect, reverse,\
     get_object_or_404
+import random
+import string
+from django.contrib import messages
+
 
 # Create your views here.
 
 def carrito(request):
     context = {}
     context['usuario'] = request.user
+    ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
     if(str(request.user) == 'AnonymousUser'):
-        ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
-        Carrito.objects.filter(cliente_id=request.user.id).exclude(id=ultimo_carrito).delete()
         if 'carrito_id' not in request.session:
-            carrito = Carrito.objects.get(cliente_id=request.user.id)
+            carrito = Carrito.objects.get(id = ultimo_carrito)
             carrito.productos.clear()
             carrito.calcular_total()
             carrito.save()
-        context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
+        context['carrito'] = Carrito.objects.get(id = ultimo_carrito)
         if 'direccion_data' in request.session:
             context['direccion'] = request.session['direccion_data']
     else:
-        if Carrito.objects.filter(cliente_id=request.user.id).exists():
-            context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
-        if Direccion.objects.filter(cliente_id=request.user.id).exists():
+        if Carrito.objects.filter(id = ultimo_carrito).exists():
+            context['carrito'] = Carrito.objects.get(id = ultimo_carrito)
+        if Direccion.objects.filter(cliente_id = request.user.id).exists():
             context['direccion'] = Direccion.objects.get(cliente_id = request.user.id)
     return render(request, 'carrito.html', context)
             
@@ -71,95 +75,142 @@ stripe.api_version = settings.STRIPE_API_VERSION
 
 def payment_process(request):
     if request.user.is_authenticated:
-        carrito_obj = Carrito.objects.get(cliente_id=request.user.id)
+        ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+        carrito_obj = Carrito.objects.get(id = ultimo_carrito)
         carrito_id = carrito_obj.id
     else:
         carrito_id = request.session.get('carrito_id', None)
     carrito = get_object_or_404(Carrito, id=carrito_id)
     carrito.calcular_total()
+
     if request.method == 'POST':
-        success_url = request.build_absolute_uri(reverse('completed'))
-        cancel_url = request.build_absolute_uri(reverse('canceled'))
-    # Stripe checkout session data
-        session_data = {
-            'mode': 'payment',
-            'success_url': success_url,
-            'cancel_url': cancel_url,
-            'line_items': []
-        }
-    # add order items to the Stripe checkout session
-        for item in carrito.itemcarrito_set.all():
+        metodo_pago = request.POST.get('metodo_pago', '')
+
+        if metodo_pago == 'Contra reembolso':
+            request.session['metodo_pago'] = metodo_pago
+            # Llama a la función payment_completed directamente
+            return payment_completed(request)
+        else:
+            request.session['metodo_pago'] = metodo_pago
+            success_url = request.build_absolute_uri(reverse('completed'))
+            cancel_url = request.build_absolute_uri(reverse('canceled'))
+        # Stripe checkout session data
+            session_data = {
+                'mode': 'payment',
+                'success_url': success_url,
+                'cancel_url': cancel_url,
+                'line_items': []
+            }
+        # add order items to the Stripe checkout session
+            for item in carrito.itemcarrito_set.all():
+                session_data['line_items'].append({
+                    'price_data': {
+                    'unit_amount': int(item.producto.precio * float(Decimal('100'))),
+                    'currency': 'eur',
+                    'product_data': {
+                        'name': item.producto.nombre,
+                    },
+                },
+                    'quantity': item.cantidad,
+                })
+            # Agregar los gastos de envío como un ítem separado
             session_data['line_items'].append({
                 'price_data': {
-                'unit_amount': int(item.producto.precio * float(Decimal('100'))),
-                'currency': 'eur',
-                'product_data': {
-                    'name': item.producto.nombre,
+                    'unit_amount': int(carrito.gastos_envio * float(Decimal('100'))),
+                    'currency': 'eur',
+                    'product_data': {
+                        'name': 'Gastos de Envío',
+                    },
                 },
-            },
-                'quantity': item.cantidad,
+                'quantity': 1,
             })
-        # Agregar los gastos de envío como un ítem separado
-        session_data['line_items'].append({
-            'price_data': {
-                'unit_amount': int(carrito.gastos_envio * float(Decimal('100'))),
-                'currency': 'eur',
-                'product_data': {
-                    'name': 'Gastos de Envío',
-                },
-            },
-            'quantity': 1,
-        })
-        # create Stripe checkout session
-        session = stripe.checkout.Session.create(**session_data)
-        print(session)
-        # redirect to Stripe payment form
-        return redirect(session.url, code=303)
+            # create Stripe checkout session
+            session = stripe.checkout.Session.create(**session_data)
+            # redirect to Stripe payment form
+            return redirect(session.url, code=303)
     else:
         return render(request,'carrito.html', locals())
     
 
 def payment_completed(request):
     if request.user.is_authenticated:
-        carro = Carrito.objects.get(cliente_id = request.user.id)
+        ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+        carro = Carrito.objects.get(id = ultimo_carrito)
         dire = Direccion.objects.get(cliente_id = request.user.id)
     else:
         carro = Carrito.objects.get(id = request.session['carrito_id'])
-        dire = Carrito.objects.get(id = request.session['direccion_data'])
-    Pedido.objects.create(
-        carrito = carro,
-        direccion = dire
-    )
+        direccion_data = request.session.get('direccion_data', None)
 
+        if direccion_data:
+            # Crea una instancia de Direccion
+            dire = Direccion.objects.create(
+                nombre=direccion_data['nombre'],
+                apellidos=direccion_data['apellidos'],
+                direccion=direccion_data['direccion'],
+                codigo_postal=direccion_data['codigo_postal'],
+                municipio=direccion_data['municipio'],
+                provincia=direccion_data['provincia'],
+                email=direccion_data['email'],
+                telefono=direccion_data['telefono']
+            )
+    num_pedido = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
+    metodo_de_pago = request.session.get('metodo_pago')
+    if carro.productos.exists():
+        Pedido.objects.create(
+            carrito = carro,
+            direccion = dire,
+            num_de_pedido=num_pedido,
+            metodo_pago=metodo_de_pago
+        )
+    else:
+        return redirect('/')
+    if request.user.is_authenticated:
+        Carrito.objects.create(cliente_id = request.user.id)
+    else:
+        nuevo = Carrito.objects.create()
+        request.session['carrito_id'] = nuevo.id
+        
     enviar_correo_confirmacion(carro, dire)
-
-    mis_pedidos(request)
-    return redirect('mis_pedidos')
+    return render(request,'exito.html')
 
 def enviar_correo_confirmacion(carrito, direccion):
     subject = 'Confirmación de pedido'
-    
-    # Construir el cuerpo del mensaje con los detalles del pedido
-    message = f'Tu pedido ha sido confirmado. Detalles:\n\n'
-    
-    for item in carrito.itemcarrito_set.all():
-        message += f'Producto: {item.producto.nombre}\n' + f'Cantidad: {item.cantidad}\n'
-        message += f'Precio unitario: {item.producto.precio} EUR\n'
-        message += f'Precio unitario: {item.gastos_envio} EUR\n'
-    
-    message += f'Total del pedido: {carrito.total} EUR\n\n'
-    
-    message += f'Dirección de entrega:\n'
-    message += f'Nombre: {direccion.nombre} {direccion.apellidos}\n'
-    message += f'Dirección: {direccion.direccion}\n'
-    message += f'Código Postal: {direccion.codigo_postal}\n'
-    message += f'Municipio: {direccion.municipio}\n'
-    message += f'Provincia: {direccion.provincia}\n'
-    message += f'Email: {direccion.email}\n'
-    message += f'Teléfono: {direccion.telefono}\n'
 
-    # Enviar el correo electrónico
-    send_mail(subject, message, 'baruspgpi@gmail.com', [direccion.email])
+    # Obtén todos los pedidos asociados al carrito
+    pedidos = Pedido.objects.filter(carrito=carrito)
+
+    # Verifica si hay al menos un pedido
+    if pedidos.exists():
+        # Obtén el primer pedido (puedes ajustar esta lógica según tus necesidades)
+        pedido = pedidos.first()
+
+        # Construir el cuerpo del mensaje con los detalles del pedido
+        message = f'Tu pedido ha sido confirmado. Detalles:\n\n'
+        message += f'Número de seguimiento del pedido: {pedido.num_de_pedido}\n\n'  # Añade el número de pedido
+
+        for item in carrito.itemcarrito_set.all():
+            message += f'Producto: {item.producto.nombre}\n' + f'Cantidad: {item.cantidad}\n'
+            message += f'Precio unitario: {item.producto.precio} EUR\n'
+
+        message += f'Total del pedido: {carrito.total} EUR\n'
+        message += f'Método de pago: {pedido.metodo_pago}\n\n' 
+
+        message += f'Dirección de entrega:\n'
+        message += f'Nombre: {direccion.nombre} {direccion.apellidos}\n'
+        message += f'Dirección: {direccion.direccion}\n'
+        message += f'Código Postal: {direccion.codigo_postal}\n'
+        message += f'Municipio: {direccion.municipio}\n'
+        message += f'Provincia: {direccion.provincia}\n'
+        message += f'Email: {direccion.email}\n'
+        message += f'Teléfono: {direccion.telefono}\n'
+
+        # Enviar el correo electrónico
+        send_mail(subject, message, 'baruspgpi@gmail.com', [direccion.email])
+    else:
+        # Manejar el caso donde no hay ningún pedido asociado al carrito
+        # Puedes imprimir un mensaje de error o tomar otras acciones según sea necesario
+        print("Error: No se encontró ningún pedido asociado al carrito.")
+
 
 def payment_canceled(request):
     return render(request,'cancelado.html')
@@ -229,5 +280,26 @@ def crear_direccion(request):
 
 def mis_pedidos(request):
     context = {}
-    context['pedidos'] = Pedido.objects.filter(direccion__cliente = request.user)
+
+    # Verificar si el usuario está autenticado
+    if request.user.is_authenticated:
+        # Filtrar los pedidos asociados al usuario autenticado
+        context['pedidos'] = Pedido.objects.filter(direccion__cliente=request.user)
+    else:
+        # Si el usuario no está autenticado, establecer una lista vacía de pedidos
+        context['pedidos'] = []
+
     return render(request, 'mis_pedidos.html', context)
+
+def buscar_pedidos(request):
+    numero_pedido = request.GET.get('numero_pedido', '')
+    
+    if request.user.is_authenticated:
+        pedidos = Pedido.objects.filter(direccion__cliente=request.user, num_de_pedido__icontains=numero_pedido)
+    else:
+        if numero_pedido:
+            pedidos = Pedido.objects.filter(direccion__cliente__isnull=True, num_de_pedido__icontains=numero_pedido)
+        else:
+            pedidos = []
+
+    return render(request, 'mis_pedidos.html', {'pedidos': pedidos, 'numero_pedido': numero_pedido})

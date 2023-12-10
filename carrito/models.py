@@ -2,13 +2,14 @@ from django.db import models
 from catalogo.models import Producto
 from django.contrib.auth.models import User
 
+
 # Create your models here.
 
 class Carrito(models.Model):
     cliente = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     productos = models.ManyToManyField(Producto, through='ItemCarrito')
     total = models.DecimalField(default=0, max_digits=10, decimal_places=2)
-    gastos_envio = models.DecimalField(default=15, max_digits=5, decimal_places=2, null=True, blank=True)
+    gastos_envio = models.DecimalField(default=5, max_digits=5, decimal_places=2, null=True, blank=True)
 
     def calcular_total(self):
         precios = sum(item.producto.precio * item.cantidad for item in self.itemcarrito_set.all())
@@ -47,7 +48,13 @@ class Pedido(models.Model):
         ('En camino', 'En_camino'),
         ('Entregado', 'Entregado'),
     )
+    METODOS_DE_PAGO = [
+        ('Tarjeta', 'Tarjeta'),
+        ('Contra reembolso', 'Contra reembolso'),
+    ]
+    
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
     direccion = models.ForeignKey(Direccion, on_delete=models.CASCADE)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Aceptado')
-
+    num_de_pedido = models.CharField(max_length=5, unique=True, blank=True, null=True)
+    metodo_pago = models.CharField(max_length=20, choices=METODOS_DE_PAGO, default='Tarjeta')

@@ -1,9 +1,49 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="es">
 
-{% block contenido %}
- <h1>Tu pago no ha sido procesado</h1>
- <p>Hubo un problema procesando el pedido.</p>
-{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Pedido Realizado</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #da3f3f;
+            /* Fondo verdoso */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-<a href="/"><button type="button" class="btn btn-secondary">Volver</button></a>
+        .carta {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .boton-inicio {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="carta">
+        <h1>Ha habido un fallo en la compra</h1>
+        <p>¡Vuelve a intentarlo!</p>
+
+        <!-- Puedes personalizar el enlace a la página de inicio -->
+        <a href="/" class="btn btn-primary boton-inicio">Ir al Inicio</a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

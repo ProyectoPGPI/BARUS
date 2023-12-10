@@ -15,4 +15,5 @@ urlpatterns = [
     path('direccion/', views.direccion, name = 'direccion'),
     path('crear_direccion/', crear_direccion, name='crear_direccion'),
     path('mis_pedidos/', views.mis_pedidos, name='mis_pedidos'),
+    path('buscar_pedidos/', views.buscar_pedidos, name='buscar_pedidos'),
 ]
