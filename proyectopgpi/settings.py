@@ -146,3 +146,15 @@ AUTHENTICATION_BACKENDS = [
 STRIPE_PUBLISHABLE_KEY = 'pk_test_51OKJOnItQWOA5nomxpkUiiHHx2Kn9hwpp6M4WZf4eLklNuOaE8exes876qHYFqWDnhnbEpXJaFMo8GpogqzgEezd00KhAU7v5N' # Publishable key
 STRIPE_SECRET_KEY = 'sk_test_51OKJOnItQWOA5nom8XRDsMMYGM7xDGNZ8OSnfwX8nUsKeQqMSEnTD9za1J2LGyCg4mEmn5D0EHNsTGTAjbBnSiQK00nUkYai1J' # Secret key
 STRIPE_API_VERSION = '2022-08-01'
+
+# Configuración del servidor de correo electrónico (SMTP de Gmail)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'baruspgpi@gmail.com'  # Reemplaza con tu dirección de correo
+EMAIL_HOST_PASSWORD = 'uxbs yhje lgai rrkc'  # Reemplaza con tu contraseña de correo
+
+DEFAULT_FROM_EMAIL = 'baruspgpi@gmail.com'  # Reemplaza con tu dirección de correo
+SERVER_EMAIL = 'baruspgpi@gmail.com'
+

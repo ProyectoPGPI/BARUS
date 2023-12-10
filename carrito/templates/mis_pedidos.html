@@ -4,11 +4,21 @@
 {% block contenido %}
 <div class="container mt-4">
     <h2>Listado de Pedidos</h2>
-
+    <hr>
+    <form method="GET" action="{% url 'buscar_pedidos' %}">
+        <div class="form-group">
+            <label for="numero_pedido">Buscar por número de pedido:</label>
+            <input type="text" class="form-control" id="numero_pedido" name="numero_pedido">
+        </div>
+        <button type="submit" class="btn btn-primary mt-1 mb-2">Buscar</button>
+    </form>
+    <hr>
     {% for pedido in pedidos %}
         <div class="card mb-4">
             <div class="card-header">
-                Pedido #{{ pedido.id }}
+                <p>Pedido #{{ pedido.id }}</p>
+                <p>Número de pedido #{{ pedido.num_de_pedido }}</p>
+                
             </div>
             <div class="card-body">
                 <h5 class="card-title">Productos en el pedido:</h5>
@@ -18,7 +28,10 @@
                             {{ item.producto.nombre }} - Cantidad: {{ item.cantidad }}
                         </li>
                     {% endfor %}
+                    <br>
+                    <p><strong>Estado del pedido: </strong> {{ pedido.estado }}</p>
                 </ul>
+
             </div>
             <div class="card-footer">
                 <h6>Dirección de Envío:</h6>

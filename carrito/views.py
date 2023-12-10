@@ -4,16 +4,20 @@ from django.template import loader
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.http import Http404
+from django.core.mail import send_mail
 
 from django.shortcuts import redirect
 from .models import Carrito, ItemCarrito, Pedido, Direccion
 from django.db.models import Max
 from django.db.models import F
+from django.contrib.auth.decorators import login_required
 
 from decimal import Decimal
 import stripe
 from django.shortcuts import render, redirect, reverse,\
     get_object_or_404
+import random
+import string
 
 # Create your views here.
 
@@ -138,11 +142,12 @@ def payment_completed(request):
                 email=direccion_data['email'],
                 telefono=direccion_data['telefono']
             )
-
+    num_pedido = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
     if carro.productos.exists():
         Pedido.objects.create(
             carrito = carro,
-            direccion = dire
+            direccion = dire,
+            num_de_pedido=num_pedido
         )
     else:
         return redirect('/')
@@ -151,7 +156,47 @@ def payment_completed(request):
     else:
         nuevo = Carrito.objects.create()
         request.session['carrito_id'] = nuevo.id
+        
+    enviar_correo_confirmacion(carro, dire)
     return render(request,'exito.html')
+
+def enviar_correo_confirmacion(carrito, direccion):
+    subject = 'Confirmación de pedido'
+
+    # Obtén todos los pedidos asociados al carrito
+    pedidos = Pedido.objects.filter(carrito=carrito)
+
+    # Verifica si hay al menos un pedido
+    if pedidos.exists():
+        # Obtén el primer pedido (puedes ajustar esta lógica según tus necesidades)
+        pedido = pedidos.first()
+
+        # Construir el cuerpo del mensaje con los detalles del pedido
+        message = f'Tu pedido ha sido confirmado. Detalles:\n\n'
+        message += f'Número de pedido: {pedido.num_de_pedido}\n\n'  # Añade el número de pedido
+
+        for item in carrito.itemcarrito_set.all():
+            message += f'Producto: {item.producto.nombre}\n' + f'Cantidad: {item.cantidad}\n'
+            message += f'Precio unitario: {item.producto.precio} EUR\n'
+
+        message += f'Total del pedido: {carrito.total} EUR\n'
+
+        message += f'Dirección de entrega:\n'
+        message += f'Nombre: {direccion.nombre} {direccion.apellidos}\n'
+        message += f'Dirección: {direccion.direccion}\n'
+        message += f'Código Postal: {direccion.codigo_postal}\n'
+        message += f'Municipio: {direccion.municipio}\n'
+        message += f'Provincia: {direccion.provincia}\n'
+        message += f'Email: {direccion.email}\n'
+        message += f'Teléfono: {direccion.telefono}\n'
+
+        # Enviar el correo electrónico
+        send_mail(subject, message, 'baruspgpi@gmail.com', [direccion.email])
+    else:
+        # Manejar el caso donde no hay ningún pedido asociado al carrito
+        # Puedes imprimir un mensaje de error o tomar otras acciones según sea necesario
+        print("Error: No se encontró ningún pedido asociado al carrito.")
+
 
 def payment_canceled(request):
     return render(request,'cancelado.html')
@@ -221,5 +266,26 @@ def crear_direccion(request):
 
 def mis_pedidos(request):
     context = {}
-    context['pedidos'] = Pedido.objects.filter(direccion__cliente = request.user)
+
+    # Verificar si el usuario está autenticado
+    if request.user.is_authenticated:
+        # Filtrar los pedidos asociados al usuario autenticado
+        context['pedidos'] = Pedido.objects.filter(direccion__cliente=request.user)
+    else:
+        # Si el usuario no está autenticado, establecer una lista vacía de pedidos
+        context['pedidos'] = []
+
     return render(request, 'mis_pedidos.html', context)
+
+@login_required(login_url='/login/')  # Redirige a la página de inicio de sesión si el usuario no está autenticado
+def buscar_pedidos(request):
+    numero_pedido = request.GET.get('numero_pedido', '')
+    
+    if request.user.is_authenticated:
+        # Filtra los pedidos por número de pedido para usuarios autenticados
+        pedidos = Pedido.objects.filter(num_de_pedido__icontains=numero_pedido)
+    else:
+        # Si el usuario no está autenticado, solo muestra el formulario de búsqueda
+        return render(request, 'buscar_pedidos.html', {'numero_pedido': numero_pedido})
+
+    return render(request, 'mis_pedidos.html', {'pedidos': pedidos, 'numero_pedido': numero_pedido})
