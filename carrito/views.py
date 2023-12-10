@@ -82,43 +82,52 @@ def payment_process(request):
         carrito_id = request.session.get('carrito_id', None)
     carrito = get_object_or_404(Carrito, id=carrito_id)
     carrito.calcular_total()
+
     if request.method == 'POST':
-        success_url = request.build_absolute_uri(reverse('completed'))
-        cancel_url = request.build_absolute_uri(reverse('canceled'))
-    # Stripe checkout session data
-        session_data = {
-            'mode': 'payment',
-            'success_url': success_url,
-            'cancel_url': cancel_url,
-            'line_items': []
-        }
-    # add order items to the Stripe checkout session
-        for item in carrito.itemcarrito_set.all():
+        metodo_pago = request.POST.get('metodo_pago', '')
+
+        if metodo_pago == 'Contra reembolso':
+            request.session['metodo_pago'] = metodo_pago
+            # Llama a la función payment_completed directamente
+            return payment_completed(request)
+        else:
+            request.session['metodo_pago'] = metodo_pago
+            success_url = request.build_absolute_uri(reverse('completed'))
+            cancel_url = request.build_absolute_uri(reverse('canceled'))
+        # Stripe checkout session data
+            session_data = {
+                'mode': 'payment',
+                'success_url': success_url,
+                'cancel_url': cancel_url,
+                'line_items': []
+            }
+        # add order items to the Stripe checkout session
+            for item in carrito.itemcarrito_set.all():
+                session_data['line_items'].append({
+                    'price_data': {
+                    'unit_amount': int(item.producto.precio * float(Decimal('100'))),
+                    'currency': 'eur',
+                    'product_data': {
+                        'name': item.producto.nombre,
+                    },
+                },
+                    'quantity': item.cantidad,
+                })
+            # Agregar los gastos de envío como un ítem separado
             session_data['line_items'].append({
                 'price_data': {
-                'unit_amount': int(item.producto.precio * float(Decimal('100'))),
-                'currency': 'eur',
-                'product_data': {
-                    'name': item.producto.nombre,
+                    'unit_amount': int(carrito.gastos_envio * float(Decimal('100'))),
+                    'currency': 'eur',
+                    'product_data': {
+                        'name': 'Gastos de Envío',
+                    },
                 },
-            },
-                'quantity': item.cantidad,
+                'quantity': 1,
             })
-        # Agregar los gastos de envío como un ítem separado
-        session_data['line_items'].append({
-            'price_data': {
-                'unit_amount': int(carrito.gastos_envio * float(Decimal('100'))),
-                'currency': 'eur',
-                'product_data': {
-                    'name': 'Gastos de Envío',
-                },
-            },
-            'quantity': 1,
-        })
-        # create Stripe checkout session
-        session = stripe.checkout.Session.create(**session_data)
-        # redirect to Stripe payment form
-        return redirect(session.url, code=303)
+            # create Stripe checkout session
+            session = stripe.checkout.Session.create(**session_data)
+            # redirect to Stripe payment form
+            return redirect(session.url, code=303)
     else:
         return render(request,'carrito.html', locals())
     
@@ -145,11 +154,13 @@ def payment_completed(request):
                 telefono=direccion_data['telefono']
             )
     num_pedido = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
+    metodo_de_pago = request.session.get('metodo_pago')
     if carro.productos.exists():
         Pedido.objects.create(
             carrito = carro,
             direccion = dire,
-            num_de_pedido=num_pedido
+            num_de_pedido=num_pedido,
+            metodo_pago=metodo_de_pago
         )
     else:
         return redirect('/')
@@ -175,13 +186,14 @@ def enviar_correo_confirmacion(carrito, direccion):
 
         # Construir el cuerpo del mensaje con los detalles del pedido
         message = f'Tu pedido ha sido confirmado. Detalles:\n\n'
-        message += f'Número de pedido: {pedido.num_de_pedido}\n\n'  # Añade el número de pedido
+        message += f'Número de seguimiento del pedido: {pedido.num_de_pedido}\n\n'  # Añade el número de pedido
 
         for item in carrito.itemcarrito_set.all():
             message += f'Producto: {item.producto.nombre}\n' + f'Cantidad: {item.cantidad}\n'
             message += f'Precio unitario: {item.producto.precio} EUR\n'
 
         message += f'Total del pedido: {carrito.total} EUR\n'
+        message += f'Método de pago: {pedido.metodo_pago}\n\n' 
 
         message += f'Dirección de entrega:\n'
         message += f'Nombre: {direccion.nombre} {direccion.apellidos}\n'
