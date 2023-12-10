@@ -3,62 +3,113 @@
         "model": "catalogo.producto",
         "pk": 1,
         "fields": {
-            "nombre": "Producto 1",
+            "nombre": "Mesa de exterior",
             "precio": 19.99,
-            "descripcion": "Descripción del Producto 1",
-            "fecha_registro": "2023-11-18",
+            "descripcion": "Mesa de exterior resistente",
             "tipo_seccion": "exterior",
-            "imagen": "1.jpeg",
-            "avalible": true,
-            "departamento": "cocina",
-            "fabricante": "Bosh",
-            "stock" :10
+            "imagen": "mesa.jpg",
+            "departamento": "mobiliario",
+            "fabricante": "Ikea",
+            "stock" : 10
         }
     },
     {
         "model": "catalogo.producto",
         "pk": 2,
         "fields": {
-            "nombre": "Producto 2",
-            "precio": 29.99,
-            "descripcion": "Descripción del Producto 2",
-            "fecha_registro": "2023-11-18",
+            "nombre": "Horno industrial",
+            "precio": 109.99,
+            "descripcion": "Horno industrial de alta capacidad",
             "tipo_seccion": "maquinaria",
-            "imagen": "2.jpeg",
-            "avalible": true,
+            "imagen": "horno.jpg",
             "departamento": "cocina",
-            "fabricante": "Bosh",
-            "stock" :20
+            "fabricante": "Fagor",
+            "stock" : 20
         }
-    },{
+    },
+    {
         "model": "catalogo.producto",
         "pk": 3,
         "fields": {
-            "nombre": "Producto 3",
+            "nombre": "Silla de comedor",
             "precio": 39.99,
-            "descripcion": "Descripción del Producto 3",
-            "fecha_registro": "2023-11-18",
+            "descripcion": "Silla de comedor cómoda y elegante",
             "tipo_seccion": "interior",
-            "imagen": "3.jpg",
-            "avalible": true,
-            "departamento": "cocina",
-            "fabricante": "Bosh",
-            "stock" :4
+            "imagen": "silla.jpeg",
+            "departamento": "mobiliario",
+            "fabricante": "Ikea",
+            "stock" : 4
         }
-    },{
+    },
+    {
         "model": "catalogo.producto",
         "pk": 4,
         "fields": {
-            "nombre": "Producto 4",
-            "precio": 99.99,
-            "descripcion": "Descripción del Producto 3",
-            "fecha_registro": "2023-11-18",
+            "nombre": "Barra de bar",
+            "precio": 199.99,
+            "descripcion": "Barra de bar de madera pulida",
             "tipo_seccion": "interior",
-            "imagen": "3.jpg",
-            "avalible": true,
+            "imagen": "barra.jpeg",
+            "departamento": "mobiliario",
+            "fabricante": "BarDesign",
+            "stock" : 0
+        }
+    },
+    {
+        "model": "catalogo.producto",
+        "pk": 5,
+        "fields": {
+            "nombre": "Taburete de bar",
+            "precio": 49.99,
+            "descripcion": "Taburete de bar alto y cómodo",
+            "tipo_seccion": "interior",
+            "imagen": "taburete.jpeg",
+            "departamento": "mobiliario",
+            "fabricante": "BarDesign",
+            "stock" : 15
+        }
+    },
+    {
+        "model": "catalogo.producto",
+        "pk": 6,
+        "fields": {
+            "nombre": "Parrilla industrial",
+            "precio": 159.99,
+            "descripcion": "Parrilla industrial para asados perfectos",
+            "tipo_seccion": "maquinaria",
+            "imagen": "parrilla.jpg",
             "departamento": "cocina",
-            "fabricante": "Bosh",
-            "stock" :0
+            "fabricante": "Fagor",
+            "stock" : 2
+        }
+    },
+    {
+        "model": "catalogo.producto",
+        "pk": 7,
+        "fields": {
+            "nombre": "Sombrilla de terraza",
+            "precio": 89.99,
+            "descripcion": "Sombrilla grande para terraza",
+            "tipo_seccion": "exterior",
+            "imagen": "sombrilla.jpg",
+            "departamento": "mobiliario",
+            "fabricante": "Ikea",
+            "stock" : 20
+        }
+    },
+    {
+        "model": "catalogo.producto",
+        "pk": 8,
+        "fields": {
+            "nombre": "Lavavajillas industrial",
+            "precio": 299.99,
+            "descripcion": "Lavavajillas industrial de alta capacidad",
+            "tipo_seccion": "maquinaria",
+            "imagen": "lavavajillas.jpg",
+            "departamento": "cocina",
+            "fabricante": "Fagor",
+            "stock" : 8
+        }
     }
-}
 ]
+

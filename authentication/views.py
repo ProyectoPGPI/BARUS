@@ -57,15 +57,23 @@ def signup(request):
 
 def login_view(request):
     if request.method == 'POST':
+        # Utiliza EmailAuthenticationForm
         form = EmailAuthenticationForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
+
+            # Utiliza authenticate correctamente para comparar el campo de correo electrónico
             user = authenticate(request, email=email, password=password)
+            
             if user is not None:
                 login(request, user)
-                # Redirigir a una página de éxito o a donde sea necesario
-                return redirect('catalogo')  # Reemplaza 'dashboard' con el nombre de tu URL
+                return redirect('catalogo') 
+                
+            else:
+                messages.error(request, 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.')
+        else:
+            messages.error(request, 'Por favor, corrige los errores en el formulario.')
     else:
         form = EmailAuthenticationForm()
 
