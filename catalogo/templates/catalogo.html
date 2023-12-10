@@ -73,6 +73,21 @@
                 <option value="exterior" {% if opcion_seleccionada == 'exterior' %}selected{% endif %}>Exterior</option>
                 <option value="maquinaria" {% if opcion_seleccionada == 'maquinaria' %}selected{% endif %}>Maquinaria</option>
             </select>
+            <div class="col-auto mx-auto">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="me-3">
+                        <label for="priceRange" class="col-form-label me-2">Filtrar por precio:</label>
+                        <input type="range" class="form-range" id="priceRange" name="priceRange" min="0" max="{{ max_precio }}" step="10" value="{{ selected_price }}" style="width: 150px;">
+                        <span id="priceOutput">0 - {{ selected_price }} €</span>
+                    </div>
+        
+                    <div>
+                        <button type="submit" name="limpiar_filtro" class="btn btn-sm{% if not opcion_seleccionada and not selected_price %} btn-secondary disabled{% else %} btn-danger{% endif %}">
+                            Limpiar Filtro
+                        </button>
+                    </div>
+                </div>
+            </div>
         </form>
       <!-- Botón para la búsqueda de productos-->
     <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search" method="GET" action="{% url 'resultados_busqueda' %}">
@@ -154,7 +169,20 @@
 </html>
 
 <script>
-    document.getElementById("dropdown").addEventListener("change", function() {
-        document.getElementById("miFormulario").submit();
+    // Función para enviar automáticamente el formulario cuando cambia el menú desplegable o el rango de precios
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener elementos
+        const dropdown = document.getElementById('dropdown');
+        const priceRange = document.getElementById('priceRange');
+
+        // Función para enviar el formulario cuando cambia el menú desplegable
+        dropdown.addEventListener('change', function() {
+            document.getElementById('miFormulario').submit();
+        });
+
+        // Función para enviar el formulario cuando cambia el rango de precios
+        priceRange.addEventListener('input', function() {
+            document.getElementById('miFormulario').submit();
+        });
     });
 </script>

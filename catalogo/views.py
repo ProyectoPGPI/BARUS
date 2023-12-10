@@ -24,6 +24,8 @@ def catalogo(request):
     if request.method == 'POST':
         # Obtén el valor seleccionado del menú desplegable
         opcion_seleccionada = request.POST.get('opcion')
+        if 'limpiar_filtro' in request.POST:
+            return redirect('catalogo')
 
     if(opcion_seleccionada!=None):
         if opcion_seleccionada == 'general':
@@ -31,6 +33,21 @@ def catalogo(request):
         else:
             context['productos'] = Producto.objects.filter(tipo_seccion=opcion_seleccionada)
     context['opcion_seleccionada'] = opcion_seleccionada
+
+        
+    max_precio = Producto.objects.aggregate(Max('precio'))['precio__max']
+    selected_price = request.POST.get('priceRange')
+
+    if selected_price:
+        precio_filtrado = int(selected_price)
+        if opcion_seleccionada and opcion_seleccionada != 'general':
+            context['productos'] = context['productos'].filter(Q(precio__lte=precio_filtrado) & Q(tipo_seccion=opcion_seleccionada))
+        else:
+            context['productos'] = context['productos'].filter(precio__lte=precio_filtrado)
+
+    context['opcion_seleccionada'] = opcion_seleccionada
+    context['max_precio'] = max_precio
+    context['selected_price'] = selected_price if selected_price else max_precio
 
     cont = 0
     ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
