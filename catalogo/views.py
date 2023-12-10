@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import user_passes_test
 from .models import Producto
 from carrito.models import Carrito, ItemCarrito
 from django.conf import settings
+from django.db.models import Max
 
 from django.shortcuts import render, redirect, reverse,\
     get_object_or_404
@@ -32,13 +33,14 @@ def catalogo(request):
     context['opcion_seleccionada'] = opcion_seleccionada
 
     cont = 0
+    ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
     if request.user.is_authenticated:
-        if Carrito.objects.filter(cliente_id=request.user.id).exists():
-            carrito = Carrito.objects.get(cliente_id = request.user.id)
+        if Carrito.objects.filter(id = ultimo_carrito).exists():
+            carrito = Carrito.objects.get(id = ultimo_carrito)
             cont = carrito.obtener_cantidad_total
     else:
         if 'carrito_id' in request.session:
-            carrito = Carrito.objects.get(id = request.session['carrito_id'])
+            carrito = Carrito.objects.get(id = ultimo_carrito)
             cont = carrito.obtener_cantidad_total
     logueado = False
     if request.user.is_authenticated:
@@ -123,8 +125,6 @@ def pago_usuario_no_registrado(request):
 def agregar_al_carrito(request):
     if request.method == 'POST':
         producto_id = request.POST.get('producto_id')
-        print(request.POST.get('cantidad', 1)+"QUE PAZA PICHA")
-        
         if request.POST.get('cantidad', 1) == '':
             cantidad = 1
         else:
@@ -141,7 +141,8 @@ def agregar_al_carrito(request):
         if request.user.is_authenticated:
             # Usuario autenticado, usar base de datos
             usuario = request.user
-            carrito, created = Carrito.objects.get_or_create(cliente=usuario)
+            ultimo_carrito_id = Carrito.objects.filter(cliente=usuario).aggregate(Max('id'))['id__max']
+            carrito, created = Carrito.objects.get_or_create(id=ultimo_carrito_id, defaults={'cliente': usuario})
         else:
             # Usuario no autenticado, usar sesión
             if 'carrito_id' not in request.session:

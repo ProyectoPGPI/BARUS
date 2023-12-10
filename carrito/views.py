@@ -20,21 +20,20 @@ from django.shortcuts import render, redirect, reverse,\
 def carrito(request):
     context = {}
     context['usuario'] = request.user
+    ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
     if(str(request.user) == 'AnonymousUser'):
-        ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
-        Carrito.objects.filter(cliente_id=request.user.id).exclude(id=ultimo_carrito).delete()
         if 'carrito_id' not in request.session:
-            carrito = Carrito.objects.get(cliente_id=request.user.id)
+            carrito = Carrito.objects.get(id = ultimo_carrito)
             carrito.productos.clear()
             carrito.calcular_total()
             carrito.save()
-        context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
+        context['carrito'] = Carrito.objects.get(id = ultimo_carrito)
         if 'direccion_data' in request.session:
             context['direccion'] = request.session['direccion_data']
     else:
-        if Carrito.objects.filter(cliente_id=request.user.id).exists():
-            context['carrito'] = Carrito.objects.get(cliente_id=request.user.id)
-        if Direccion.objects.filter(cliente_id=request.user.id).exists():
+        if Carrito.objects.filter(id = ultimo_carrito).exists():
+            context['carrito'] = Carrito.objects.get(id = ultimo_carrito)
+        if Direccion.objects.filter(cliente_id = request.user.id).exists():
             context['direccion'] = Direccion.objects.get(cliente_id = request.user.id)
     return render(request, 'carrito.html', context)
             
@@ -70,7 +69,8 @@ stripe.api_version = settings.STRIPE_API_VERSION
 
 def payment_process(request):
     if request.user.is_authenticated:
-        carrito_obj = Carrito.objects.get(cliente_id=request.user.id)
+        ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+        carrito_obj = Carrito.objects.get(id = ultimo_carrito)
         carrito_id = carrito_obj.id
     else:
         carrito_id = request.session.get('carrito_id', None)
@@ -111,7 +111,6 @@ def payment_process(request):
         })
         # create Stripe checkout session
         session = stripe.checkout.Session.create(**session_data)
-        print(session)
         # redirect to Stripe payment form
         return redirect(session.url, code=303)
     else:
@@ -120,16 +119,35 @@ def payment_process(request):
 
 def payment_completed(request):
     if request.user.is_authenticated:
-        carro = Carrito.objects.get(cliente_id = request.user.id)
+        ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+        carro = Carrito.objects.get(id = ultimo_carrito)
         dire = Direccion.objects.get(cliente_id = request.user.id)
     else:
         carro = Carrito.objects.get(id = request.session['carrito_id'])
-        dire = Carrito.objects.get(id = request.session['direccion_data'])
+        direccion_data = request.session.get('direccion_data', None)
+
+        if direccion_data:
+            # Crea una instancia de Direccion
+            dire = Direccion.objects.create(
+                nombre=direccion_data['nombre'],
+                apellidos=direccion_data['apellidos'],
+                direccion=direccion_data['direccion'],
+                codigo_postal=direccion_data['codigo_postal'],
+                municipio=direccion_data['municipio'],
+                provincia=direccion_data['provincia'],
+                email=direccion_data['email'],
+                telefono=direccion_data['telefono']
+            )
     Pedido.objects.create(
         carrito = carro,
         direccion = dire
     )
-    return mis_pedidos(request)
+    if request.user.is_authenticated:
+        Carrito.objects.create(cliente_id = request.user.id)
+    else:
+        nuevo = Carrito.objects.create()
+        request.session['carrito_id'] = nuevo.id
+    return render(request,'exito.html')
 
 def payment_canceled(request):
     return render(request,'cancelado.html')
