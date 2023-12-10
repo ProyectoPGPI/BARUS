@@ -138,10 +138,14 @@ def payment_completed(request):
                 email=direccion_data['email'],
                 telefono=direccion_data['telefono']
             )
-    Pedido.objects.create(
-        carrito = carro,
-        direccion = dire
-    )
+
+    if carro.productos.exists():
+        Pedido.objects.create(
+            carrito = carro,
+            direccion = dire
+        )
+    else:
+        return redirect('/')
     if request.user.is_authenticated:
         Carrito.objects.create(cliente_id = request.user.id)
     else:
