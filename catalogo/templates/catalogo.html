@@ -110,18 +110,30 @@
                                         <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center col-3">
                                         {% csrf_token %}
                                         <!-- Agregar campos ocultos o parámetros necesarios para identificar el producto -->
-                                        <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" max="{{producto.stock}}">
-                                        <input type="hidden" name="producto_id" value="{{ producto.id }}">
-                                        <button type="submit" class="btn btn-warning text-center" title="Añadir al carrito"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+                                            <div class="col-auto mx-auto">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="me-2">
+                                                        <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" max="{{producto.stock}}">
+                                                    </div>
+                                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                                    <button type="submit" class="btn btn-warning text-center mt-2 mb-2" title="Añadir al carrito"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+                                                </div>
+                                            </div>
                                         </form>
                                         <span class="badge rounded-pill bg-warning" style="font-size: medium;">Quedan pocas unidades</span>
                                     {% else %}
                                         <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center col-3">
                                         {% csrf_token %}
                                         <!-- Agregar campos ocultos o parámetros necesarios para identificar el producto -->
-                                        <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" max="{{producto.stock}}">
-                                        <input type="hidden" name="producto_id" value="{{ producto.id }}">
-                                        <button type="submit" class="btn btn-warning text-center" title="Añadir al carrito"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+                                        <div class="col-auto mx-auto">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="me-2">
+                                                    <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" max="{{producto.stock}}">
+                                                </div>
+                                                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                                <button type="submit" class="btn btn-warning text-center mt-2 mb-2" title="Añadir al carrito"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+                                            </div>
+                                        </div>
                                         </form>
                                         
                                     {% endif %}
