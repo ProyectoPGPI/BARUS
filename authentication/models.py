@@ -10,8 +10,8 @@ class Reclamacion(models.Model):
         ('Cancelada', 'Cancelada'),
     )
 
-    titulo = models.CharField(max_length=255)
-    descripcion = models.TextField()
+    titulo = models.CharField(max_length=20)
+    descripcion = models.CharField(max_length=255)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Pendiente')
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
 

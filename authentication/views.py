@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from carrito.models import Carrito
 from .models import Reclamacion 
 
-from .forms import EmailAuthenticationForm
+from .forms import EmailAuthenticationForm, ReclamacionForm
 
 # Create your views here.
 
@@ -100,10 +100,21 @@ def logout_view(request):
 
 def reclamaciones(request):
     if request.method == 'POST':
-        titulo = request.POST.get('titulo')
-        descripcion = request.POST.get('descripcion')
-        Reclamacion.objects.create(titulo=titulo, descripcion=descripcion, estado='Pendiente', usuario=request.user)
-        return redirect('reclamaciones')  # Redirige para evitar reenvío del formulario al recargar la página
+        form = ReclamacionForm(request.POST)
+        if form.is_valid():
+            reclamacion = form.save(commit=False)
+            reclamacion.usuario = request.user
+            reclamacion.save()
+            return redirect('reclamaciones')
+        else:
+            # Manejar mensajes de error específicos
+            if 'titulo' in form.errors:
+                messages.error(request, 'La longitud del título debe ser de 20 carácteres como máximo.')
+            if 'descripcion' in form.errors:
+                messages.error(request, 'La longitud de la descripción debe ser de 255 carácteres como máximo.')
+
+    else:
+        form = ReclamacionForm()
 
     reclamaciones = Reclamacion.objects.filter(usuario=request.user)
-    return render(request, 'reclamaciones.html', {'reclamaciones': reclamaciones})
+    return render(request, 'reclamaciones.html', {'form': form, 'reclamaciones': reclamaciones})
