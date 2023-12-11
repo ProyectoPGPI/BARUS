@@ -75,6 +75,9 @@ def catalogo(request):
 
     context['logueado'] = logueado     
     context['num_productos_carrito'] = cont
+    if 'carrito_id' not in request.session:
+        carrito = Carrito.objects.create()
+        request.session['carrito_id'] = carrito.id
     return render(request, 'catalogo.html', context)
 
 def product_view(request, product_id):
@@ -161,7 +164,16 @@ def agregar_al_carrito(request):
         # Validación: si no se proporciona cantidad o está vacía, se establece como 1
         producto = get_object_or_404(Producto, pk=producto_id)
         stock_disponible = producto.stock
-        request.session['stock_restante'] = {producto.id: stock_disponible - cantidad}
+        ultimo_carrito_id = Carrito.objects.filter(cliente=request.user.id).aggregate(Max('id'))['id__max']
+        car = Carrito.objects.get(id = ultimo_carrito_id)
+        dic = request.session['stock_restante']
+        dic[producto.id] = stock_disponible - cantidad
+        for item in car.productos.all():
+            cantidad_carrito = ItemCarrito.objects.get(carrito=car, producto=item).cantidad
+            p = Producto.objects.get(id = item.id)
+            if p.id in dic:
+                dic[p.id] = stock_disponible - cantidad - cantidad_carrito
+        request.session['stock_restante'] = dic
         # Validar la cantidad introducida
         cantidad = min(cantidad, stock_disponible)
 

@@ -7,7 +7,7 @@ from django.http import Http404
 from django.core.mail import send_mail
 
 from django.shortcuts import redirect
-from .models import Carrito, ItemCarrito, Pedido, Direccion
+from .models import Carrito, ItemCarrito, Pedido, Direccion, Producto
 from django.db.models import Max
 from django.db.models import F
 from django.contrib.auth.decorators import login_required
@@ -56,7 +56,9 @@ def actualizar_carrito(request):
 
         item_carrito.carrito.calcular_total()
 
-        request.session['stock_restante'] = {item_carrito.producto.id: item_carrito.producto.stock - int(item_carrito.cantidad)}
+        dic = request.session['stock_restante']
+        dic[item_carrito.producto.id] = item_carrito.producto.stock - int(item_carrito.cantidad)
+        request.session['stock_restante'] = dic
 
     return redirect('/carrito')
 
@@ -70,7 +72,9 @@ def borrar_del_carrito(request):
 
         item_carrito.carrito.calcular_total()
 
-        request.session['stock_restante'] = {item_carrito.producto.id: item_carrito.producto.stock}
+        dic = request.session['stock_restante']
+        dic[item_carrito.producto.id]= item_carrito.producto.stock
+        request.session['stock_restante'] = dic
 
     return redirect('/carrito')
 
@@ -192,6 +196,13 @@ def payment_completed(request):
         request.session['carrito_id'] = nuevo.id
         
     enviar_correo_confirmacion(carro, dire)
+
+    for item in carro.productos.all():
+        cantidad = ItemCarrito.objects.get(carrito=carro, producto=item).cantidad
+        p = Producto.objects.get(id = item.id)
+        p.stock -= cantidad
+        p.save()
+
     return render(request,'exito.html')
 
 def enviar_correo_confirmacion(carrito, direccion):

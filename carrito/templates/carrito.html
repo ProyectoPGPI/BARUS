@@ -106,7 +106,7 @@
                         <option value="Contra reembolso">Contra reembolso</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3"{% if direccion is None or carrito.productos.count == 0   %} disabled {% endif %}>Realizar Pedido</button>
+                <button type="submit" class="btn btn-primary mt-3"{% if direccion.nombre == '' or carrito.productos.count == 0   %} disabled {% endif %}>Realizar Pedido</button>
                 {% csrf_token %}
             </form>
         </div>
