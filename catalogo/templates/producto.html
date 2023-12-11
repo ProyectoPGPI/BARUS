@@ -60,6 +60,13 @@
                 {% if user.is_authenticated %}
                     <div>
                         <h4>Añadir Opinión:</h4>
+                        {% if messages %}
+                            <div class="alert alert-danger">
+                                {% for message in messages %}
+                                    {{ message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                         <form method="POST" action="{% url 'agregar_opinion' %}">
                             {% csrf_token %}
                             <textarea name="comentario" rows="4" cols="50" placeholder="Escribe tu opinión aquí..."></textarea>

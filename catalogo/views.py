@@ -4,6 +4,7 @@ from .models import  Opinion, Producto
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib import messages
 
 from .models import Producto
 from carrito.models import Carrito, ItemCarrito
@@ -208,7 +209,15 @@ def agregar_opinion(request):
             # Ajusta la redirección aquí
             product_id = request.POST['producto_id']
             return redirect(reverse('product_view', args=[product_id]))
+        else:
+            # Manejar mensajes de error específicos
+            if 'comentario' in form.errors:
+                messages.error(request, 'La longitud de la descripción debe ser de 255 carácteres como máximo.')
+            product_id = request.POST['producto_id']
+            return redirect(reverse('product_view', args=[product_id]))
 
     # En caso de que el formulario no sea válido o no sea una solicitud POST
     return redirect('/')  # Puedes cambiar esto a la URL adecuada
+
+
 

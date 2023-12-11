@@ -24,7 +24,7 @@ class Producto(models.Model):
 class Opinion(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    comentario = models.TextField()
+    comentario = models.CharField(max_length=255)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
