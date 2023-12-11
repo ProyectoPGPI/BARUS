@@ -56,6 +56,8 @@ def actualizar_carrito(request):
 
         item_carrito.carrito.calcular_total()
 
+        request.session['stock_restante'] = {item_carrito.producto.id: item_carrito.producto.stock - int(item_carrito.cantidad)}
+
     return redirect('/carrito')
 
 def borrar_del_carrito(request):
@@ -67,6 +69,8 @@ def borrar_del_carrito(request):
         item_carrito.delete()
 
         item_carrito.carrito.calcular_total()
+
+        request.session['stock_restante'] = {item_carrito.producto.id: item_carrito.producto.stock}
 
     return redirect('/carrito')
 
