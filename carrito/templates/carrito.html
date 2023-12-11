@@ -77,7 +77,7 @@
                 {% if direccion is None %}
                     <a href="/direccion/"><button type="button" class="btn btn-warning">Crear Dirección</button></a>
                 {% else %}
-                    <a href="/direccion/"><button type="button" class="btn btn-warning">Modificar Dirección</button></a>
+                    <a href="/direccion/"><button type="button" class="btn btn-warning">{% if direccion.nombre == '' %}Crear Dirección{% endif %}{% if direccion.nombre != '' %}Modificar Dirección{% endif %}</button></a>
                 {% endif %}
             </div>
         </div>
@@ -91,6 +91,14 @@
     <div class="row mb-4">
         <div class="d-flex justify-content-center align-items-center">
             <form action="{% url 'carrito' %}" method="post">
+                {% if logueado %}
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" id="guardar_direccion" name="guardar_direccion" class="form-check-input">
+                        <label class="form-check-label" for="guardar_direccion">Guardar dirección</label>
+                    </div>
+                </div>
+                {% endif %}
                 <div class="form-group">
                     <label for="metodo_pago">Método de pago:</label>
                     <select id="metodo_pago" name="metodo_pago" class="form-control" required>
@@ -98,7 +106,7 @@
                         <option value="Contra reembolso">Contra reembolso</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3"{% if direccion is None or carrito.productos.count == 0   %} disabled {% endif %}>Realizar Pedido</button>
+                <button type="submit" class="btn btn-primary mt-3"{% if direccion.nombre == '' or carrito.productos.count == 0   %} disabled {% endif %}>Realizar Pedido</button>
                 {% csrf_token %}
             </form>
         </div>

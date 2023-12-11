@@ -7,7 +7,7 @@ from django.http import Http404
 from django.core.mail import send_mail
 
 from django.shortcuts import redirect
-from .models import Carrito, ItemCarrito, Pedido, Direccion
+from .models import Carrito, ItemCarrito, Pedido, Direccion, Producto
 from django.db.models import Max
 from django.db.models import F
 from django.contrib.auth.decorators import login_required
@@ -27,6 +27,7 @@ def carrito(request):
     context = {}
     context['usuario'] = request.user
     ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+    ultima_direccion = Direccion.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
     if(str(request.user) == 'AnonymousUser'):
         if 'carrito_id' not in request.session:
             carrito = Carrito.objects.get(id = ultimo_carrito)
@@ -39,8 +40,8 @@ def carrito(request):
     else:
         if Carrito.objects.filter(id = ultimo_carrito).exists():
             context['carrito'] = Carrito.objects.get(id = ultimo_carrito)
-        if Direccion.objects.filter(cliente_id = request.user.id).exists():
-            context['direccion'] = Direccion.objects.get(cliente_id = request.user.id)
+        if Direccion.objects.filter(id = ultima_direccion).exists():
+            context['direccion'] = Direccion.objects.get(id = ultima_direccion)
     return render(request, 'carrito.html', context)
             
 
@@ -55,6 +56,10 @@ def actualizar_carrito(request):
 
         item_carrito.carrito.calcular_total()
 
+        dic = request.session['stock_restante']
+        dic[item_carrito.producto.id] = item_carrito.producto.stock - int(item_carrito.cantidad)
+        request.session['stock_restante'] = dic
+
     return redirect('/carrito')
 
 def borrar_del_carrito(request):
@@ -66,6 +71,10 @@ def borrar_del_carrito(request):
         item_carrito.delete()
 
         item_carrito.carrito.calcular_total()
+
+        dic = request.session['stock_restante']
+        dic[item_carrito.producto.id]= item_carrito.producto.stock
+        request.session['stock_restante'] = dic
 
     return redirect('/carrito')
 
@@ -133,10 +142,12 @@ def payment_process(request):
     
 
 def payment_completed(request):
+    guardar_direccion = request.POST.get('guardar_direccion', 'off')
     if request.user.is_authenticated:
         ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+        ultima_direccion = Direccion.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
         carro = Carrito.objects.get(id = ultimo_carrito)
-        dire = Direccion.objects.get(cliente_id = request.user.id)
+        dire = Direccion.objects.get(id = ultima_direccion)
     else:
         carro = Carrito.objects.get(id = request.session['carrito_id'])
         direccion_data = request.session.get('direccion_data', None)
@@ -166,11 +177,32 @@ def payment_completed(request):
         return redirect('/')
     if request.user.is_authenticated:
         Carrito.objects.create(cliente_id = request.user.id)
+        if guardar_direccion == 'off':
+            Direccion.objects.create(cliente_id = request.user.id)
+        else:
+            nueva_d = Direccion.objects.create(cliente_id = request.user.id)
+            nueva_d.nombre = dire.nombre
+            nueva_d.apellidos = dire.apellidos
+            nueva_d.direccion = dire.direccion
+            nueva_d.codigo_postal = dire.codigo_postal
+            nueva_d.municipio = dire.municipio
+            nueva_d.provincia = dire.provincia
+            nueva_d.email = dire.email
+            nueva_d.telefono = dire.telefono
+            nueva_d.save()
+            
     else:
         nuevo = Carrito.objects.create()
         request.session['carrito_id'] = nuevo.id
         
     enviar_correo_confirmacion(carro, dire)
+
+    for item in carro.productos.all():
+        cantidad = ItemCarrito.objects.get(carrito=carro, producto=item).cantidad
+        p = Producto.objects.get(id = item.id)
+        p.stock -= cantidad
+        p.save()
+
     return render(request,'exito.html')
 
 def enviar_correo_confirmacion(carrito, direccion):
@@ -232,7 +264,8 @@ def crear_direccion(request):
 
         # Crea una instancia de Direccion y guarda en la base de datos
         if request.user.is_authenticated:
-            direccion_existente = Direccion.objects.filter(cliente=request.user).first()
+            ultima_direccion = Direccion.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+            direccion_existente = Direccion.objects.get(id = ultima_direccion)
 
             if direccion_existente:
                 # Si la dirección existe, actualiza los campos

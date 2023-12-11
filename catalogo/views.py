@@ -21,7 +21,7 @@ def contacto(request):
 def catalogo(request):
     context = {}
     opcion_seleccionada = 'general'
-
+    stock_restante = request.session.get('stock_restante', {})
     if request.method == 'POST':
         # Obtén el valor seleccionado del menú desplegable
         opcion_seleccionada = request.POST.get('opcion')
@@ -30,9 +30,19 @@ def catalogo(request):
 
     if(opcion_seleccionada!=None):
         if opcion_seleccionada == 'general':
-            context['productos'] = Producto.objects.all()
+            productos = Producto.objects.all()
+            for producto in productos:
+                if str(producto.id) in stock_restante:
+                    producto.stock = stock_restante.get(str(producto.id))
+            context['productos'] = productos
         else:
-            context['productos'] = Producto.objects.filter(tipo_seccion=opcion_seleccionada)
+            productos = Producto.objects.filter(tipo_seccion=opcion_seleccionada)
+            productos = Producto.objects.all()
+            for producto in productos:
+                if producto.id in stock_restante:
+                    producto.stock = stock_restante.get(producto.id)
+            context['productos'] = productos
+
     context['opcion_seleccionada'] = opcion_seleccionada
 
         
@@ -66,6 +76,9 @@ def catalogo(request):
 
     context['logueado'] = logueado     
     context['num_productos_carrito'] = cont
+    if 'carrito_id' not in request.session:
+        carrito = Carrito.objects.create()
+        request.session['carrito_id'] = carrito.id
     return render(request, 'catalogo.html', context)
 
 def product_view(request, product_id):
@@ -73,13 +86,13 @@ def product_view(request, product_id):
     producto = Producto.objects.get(id=product_id)
     context['producto'] = producto
     cont = 0
-
+    ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
     opiniones = Opinion.objects.filter(producto=producto)
     context['opiniones'] = opiniones
     
     if request.user.is_authenticated:
         if Carrito.objects.filter(cliente_id=request.user.id).exists():
-            carrito = Carrito.objects.get(cliente_id = request.user.id)
+            carrito = Carrito.objects.get(id = ultimo_carrito)
             cont = carrito.obtener_cantidad_total
     else:
         if 'carrito_id' in request.session:
@@ -152,7 +165,16 @@ def agregar_al_carrito(request):
         # Validación: si no se proporciona cantidad o está vacía, se establece como 1
         producto = get_object_or_404(Producto, pk=producto_id)
         stock_disponible = producto.stock
-
+        ultimo_carrito_id = Carrito.objects.filter(cliente=request.user.id).aggregate(Max('id'))['id__max']
+        car = Carrito.objects.get(id = ultimo_carrito_id)
+        dic = request.session['stock_restante']
+        dic[producto.id] = stock_disponible - cantidad
+        for item in car.productos.all():
+            cantidad_carrito = ItemCarrito.objects.get(carrito=car, producto=item).cantidad
+            p = Producto.objects.get(id = item.id)
+            if p.id in dic:
+                dic[p.id] = stock_disponible - cantidad - cantidad_carrito
+        request.session['stock_restante'] = dic
         # Validar la cantidad introducida
         cantidad = min(cantidad, stock_disponible)
 
