@@ -43,7 +43,7 @@
                 {% for reclamacion in reclamaciones %}
                     <tr>
                     <td>{{ reclamacion.titulo }}</td>
-                    <td>{{ reclamacion.descripcion }}</td>
+                    <td style="white-space: pre-line;">{{ reclamacion.descripcion }}</td>
                     <td>{{ reclamacion.estado }}</td>
                     </tr>
                 {% endfor %}
