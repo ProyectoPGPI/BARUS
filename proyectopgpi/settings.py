@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -158,3 +159,8 @@ EMAIL_HOST_PASSWORD = 'uxbs yhje lgai rrkc'  # Reemplaza con tu contraseña de c
 DEFAULT_FROM_EMAIL = 'baruspgpi@gmail.com'  # Reemplaza con tu dirección de correo
 SERVER_EMAIL = 'baruspgpi@gmail.com'
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_DIR = os.path.dirname(BASE_DIR)
+
+MEDIA_URL = 'BARUS/catalogo/static/media/productos/'
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'BARUS/catalogo/static/media/productos/')

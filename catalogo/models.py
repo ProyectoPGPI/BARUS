@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+import os
+
 
 class TipoSeccion(models.TextChoices):
     GENERAL = 'general', _('General')
@@ -13,7 +15,7 @@ class Producto(models.Model):
     precio = models.FloatField()
     descripcion=models.TextField()
     tipo_seccion = models.CharField(max_length=10,choices=TipoSeccion.choices,default=TipoSeccion.GENERAL)
-    imagen = models.ImageField(upload_to="productos/",null=True, blank=True)
+    imagen = models.ImageField(upload_to="" ,null=True, blank=True)
     departamento = models.CharField(max_length=50)
     fabricante = models.CharField(max_length=50)
     stock = models.IntegerField(default= 0)
