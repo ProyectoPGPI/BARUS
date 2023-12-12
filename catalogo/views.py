@@ -160,20 +160,24 @@ def agregar_al_carrito(request):
             cantidad = 1
         else:
             cantidad = int(request.POST.get('cantidad', 1))
+
+        if 'stock_restante' not in request.session:
+            request.session['stock_restante'] = {}
         
 
         # Validación: si no se proporciona cantidad o está vacía, se establece como 1
         producto = get_object_or_404(Producto, pk=producto_id)
         stock_disponible = producto.stock
         ultimo_carrito_id = Carrito.objects.filter(cliente=request.user.id).aggregate(Max('id'))['id__max']
-        car = Carrito.objects.get(id = ultimo_carrito_id)
         dic = request.session['stock_restante']
-        dic[producto.id] = stock_disponible - cantidad
-        for item in car.productos.all():
-            cantidad_carrito = ItemCarrito.objects.get(carrito=car, producto=item).cantidad
-            p = Producto.objects.get(id = item.id)
-            if p.id in dic:
-                dic[p.id] = stock_disponible - cantidad - cantidad_carrito
+        if Carrito.objects.filter(id = ultimo_carrito_id).exists():
+            car = Carrito.objects.get(id = ultimo_carrito_id)
+            dic[producto.id] = stock_disponible - cantidad
+            for item in car.productos.all():
+                cantidad_carrito = ItemCarrito.objects.get(carrito=car, producto=item).cantidad
+                p = Producto.objects.get(id = item.id)
+                if p.id in dic:
+                    dic[p.id] = stock_disponible - cantidad - cantidad_carrito
         request.session['stock_restante'] = dic
         # Validar la cantidad introducida
         cantidad = min(cantidad, stock_disponible)
