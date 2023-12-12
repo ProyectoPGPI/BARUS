@@ -248,7 +248,13 @@ def payment_canceled(request):
     return render(request,'cancelado.html')
 
 def direccion(request):
-    return render(request, 'direccion.html')
+    context = {}
+    if request.user.is_authenticated:
+        ultima_direccion = Direccion.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+        context['direccion'] = Direccion.objects.get(id = ultima_direccion)
+    else:
+        context['direccion'] = request.session['direccion_data']
+    return render(request, 'direccion.html', context)
 
 def crear_direccion(request):
     if request.method == 'POST':

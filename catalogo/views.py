@@ -21,6 +21,12 @@ def contacto(request):
 def catalogo(request):
     context = {}
     opcion_seleccionada = 'general'
+    if 'buscar' not in request.session:
+        busqueda = ''
+    else:
+        busqueda = request.POST.get('buscar')
+    
+
     stock_restante = request.session.get('stock_restante', {})
     if request.method == 'POST':
         # Obtén el valor seleccionado del menú desplegable
@@ -28,7 +34,7 @@ def catalogo(request):
         if 'limpiar_filtro' in request.POST:
             return redirect('catalogo')
 
-    if(opcion_seleccionada!=None):
+    if opcion_seleccionada is not None:
         if opcion_seleccionada == 'general':
             productos = Producto.objects.all()
             for producto in productos:
@@ -39,26 +45,45 @@ def catalogo(request):
             productos = Producto.objects.filter(tipo_seccion=opcion_seleccionada)
             productos = Producto.objects.all()
             for producto in productos:
-                if producto.id in stock_restante:
+                if str(producto.id) in stock_restante:
                     producto.stock = stock_restante.get(producto.id)
             context['productos'] = productos
 
     context['opcion_seleccionada'] = opcion_seleccionada
 
-        
+    if request.method == 'POST':
+        busqueda = request.POST.get('buscar')
+        if busqueda:
+            productos_busqueda = Producto.objects.filter(Q(nombre__icontains=busqueda) | Q(descripcion__icontains=busqueda) | Q(departamento__icontains=busqueda) | Q(fabricante__icontains=busqueda))
+            for producto in productos_busqueda:
+                if str(producto.id) in stock_restante:
+                    producto.stock = stock_restante.get(producto.id)
+            context['productos'] = productos_busqueda
+    
+    context['buscar'] = busqueda
     max_precio = Producto.objects.aggregate(Max('precio'))['precio__max']
     selected_price = request.POST.get('priceRange')
-
-    if selected_price:
-        precio_filtrado = int(selected_price)
-        if opcion_seleccionada and opcion_seleccionada != 'general':
-            context['productos'] = context['productos'].filter(Q(precio__lte=precio_filtrado) & Q(tipo_seccion=opcion_seleccionada))
-        else:
-            context['productos'] = context['productos'].filter(precio__lte=precio_filtrado)
+    
+    if request.method == 'POST':
+        if selected_price:
+            precio_filtrado = int(selected_price)
+            if opcion_seleccionada and opcion_seleccionada != 'general':
+                productos_precio = context['productos'].filter(Q(precio__lte=precio_filtrado) & Q(tipo_seccion=opcion_seleccionada))
+                for producto in productos_precio:
+                    if str(producto.id) in stock_restante:
+                        producto.stock = stock_restante.get(str(producto.id))
+                context['productos'] = productos_precio
+            else:
+                productos_precio = context['productos'].filter(precio__lte=precio_filtrado)
+                for producto in productos_precio:
+                    if str(producto.id) in stock_restante:
+                        producto.stock = stock_restante.get(str(producto.id))
+                context['productos'] = productos_precio
 
     context['opcion_seleccionada'] = opcion_seleccionada
     context['max_precio'] = max_precio
     context['selected_price'] = selected_price if selected_price else max_precio
+    context['buscar'] = busqueda
 
     cont = 0
     ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
@@ -83,7 +108,10 @@ def catalogo(request):
 
 def product_view(request, product_id):
     context = {}
+    stock_restante = request.session.get('stock_restante', {})
     producto = Producto.objects.get(id=product_id)
+    if str(producto.id) in stock_restante:
+        producto.stock = stock_restante.get(str(producto.id))
     context['producto'] = producto
     cont = 0
     ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
@@ -101,34 +129,6 @@ def product_view(request, product_id):
     context['num_productos_carrito'] = cont
     return render(request, 'producto.html', context)
 
-###################################################################################
-#Función para buscar productos por nombre, descripción, departamento o fabricante.#
-###################################################################################
-
-def buscar_producto(request):
-    busqueda = request.GET.get('Buscar')
-    productos = Producto.objects.all()
-
-    if busqueda is not None:
-        productos = Producto.objects.filter(Q(nombre__icontains=busqueda) | Q(descripcion__icontains=busqueda) | Q(departamento__icontains=busqueda) | Q(fabricante__icontains=busqueda))
-    else: 
-        return redirect('catalogo')
-    
-    return render(request, 'catalogo.html', {'productos': productos})
-
-
-####################################################
-#Función para mostrar los productos de la búsqueda.#
-####################################################
-
-def mostrar_resultados_busqueda(request):
-    busqueda = request.GET.get('Buscar', '').strip()
-
-    if busqueda:  
-        productos = Producto.objects.filter(Q(nombre__icontains=busqueda) | Q(descripcion__icontains=busqueda) | Q(departamento__icontains=busqueda) | Q(fabricante__icontains=busqueda))
-        return render(request, 'busqueda_resultados.html', {'productos': productos, 'busqueda': busqueda})
-    else:
-        return redirect('catalogo')
 
     
 ###########################################################

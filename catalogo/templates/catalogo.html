@@ -88,12 +88,9 @@
                     </div>
                 </div>
             </div>
-        </form>
       <!-- Botón para la búsqueda de productos-->
-    <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search" method="GET" action="{% url 'resultados_busqueda' %}">
-        {% csrf_token %}
         <div class="input-group">
-            <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar..." name="Buscar" value="{{ request.GET.Buscar }}">
+            <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar..." id="buscar" name="buscar" value="{{ buscar }}">
             <div class="input-group-append">
                 <button class="btn btn-primary" type="submit">
                     <i class="fa fa-search" aria-hidden="true"></i>
@@ -174,6 +171,7 @@
         // Obtener elementos
         const dropdown = document.getElementById('dropdown');
         const priceRange = document.getElementById('priceRange');
+        const buscar = document.getElementById('buscar');
 
         // Función para enviar el formulario cuando cambia el menú desplegable
         dropdown.addEventListener('change', function() {
@@ -183,6 +181,18 @@
         // Función para enviar el formulario cuando cambia el rango de precios
         priceRange.addEventListener('input', function() {
             document.getElementById('miFormulario').submit();
+        });
+
+        buscar.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                // Evita la acción predeterminada para que no se envíe el formulario automáticamente
+                event.preventDefault();
+
+                // Verifica si hay un valor en el campo de búsqueda antes de enviar el formulario
+                if (buscar.value.trim() !== '') {
+                    document.getElementById('miFormulario').submit();
+                }
+            }
         });
     });
 </script>
