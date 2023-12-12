@@ -18,7 +18,6 @@ class Migration(migrations.Migration):
                 ('nombre', models.CharField(max_length=50)),
                 ('precio', models.FloatField()),
                 ('descripcion', models.TextField()),
-                ('fecha_registro', models.DateField()),
                 ('tipo_seccion', models.CharField(choices=[('general', 'General'), ('interior', 'Interior'), ('exterior', 'Exterior'), ('maquinaria', 'Maquinaria')], default='general', max_length=10)),
                 ('imagen', models.ImageField(blank=True, null=True, upload_to='productos/')),
                 ('avalible', models.BooleanField(default=True)),

@@ -5,10 +5,10 @@
 {% block head %}
 <head>
     <meta charset="UTF-8">
-    <title>CATÁLOGO DE PRODUCTOS</title>
+    <title>Catálogo de productos</title>
     <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
-    <link rel="stylesheet" href="/proyectopgpi/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/font-awesome-4.7.0/css/font-awesome.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
         crossorigin="anonymous"></script>
@@ -30,6 +30,17 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/">Inicio</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'contacto' %}">Contacto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'mis_pedidos' %}">Mis pedidos</a>
+                    </li>
+                    {% if logueado %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'reclamaciones' %}">Reclamaciones</a>
+                    </li>
+                    {% endif %}
                 </ul>
                 <a href="/carrito"><button type="button" class="btn btn-primary position-relative" style="margin-right: 10px;">
                     <i class="fa fa-shopping-cart" aria-hidden="true"></i>
@@ -40,12 +51,12 @@
                 </a>
                 {% if logueado %}
                 <span class="navbar-text">
-                    <a href="/authentication/logout-view"><button class="btn btn-secondary">Logout</button></a>
+                    <a href="/authentication/logout-view"><button class="btn btn-secondary">Cerrar sesión</button></a>
                 </span>
                 {% endif %}
                 {% if not logueado %}
                 <span class="navbar-text">
-                    <a href="/login/"><button class="btn btn-secondary">Login</button></a>
+                    <a href="/login/"><button class="btn btn-secondary">Iniciar sesión</button></a>
                 </span>
                 {% endif %}
             </div>
@@ -62,12 +73,24 @@
                 <option value="exterior" {% if opcion_seleccionada == 'exterior' %}selected{% endif %}>Exterior</option>
                 <option value="maquinaria" {% if opcion_seleccionada == 'maquinaria' %}selected{% endif %}>Maquinaria</option>
             </select>
-        </form>
+            <div class="col-auto mx-auto">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="me-3">
+                        <label for="priceRange" class="col-form-label me-2">Filtrar por precio:</label>
+                        <input type="range" class="form-range" id="priceRange" name="priceRange" min="0" max="{{ max_precio }}" step="10" value="{{ selected_price }}" style="width: 150px;">
+                        <span id="priceOutput">0 - {{ selected_price }} €</span>
+                    </div>
+        
+                    <div>
+                        <button type="submit" name="limpiar_filtro" class="btn btn-sm{% if not opcion_seleccionada and not selected_price %} btn-secondary disabled{% else %} btn-danger{% endif %}">
+                            Limpiar Filtro
+                        </button>
+                    </div>
+                </div>
+            </div>
       <!-- Botón para la búsqueda de productos-->
-    <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search" method="GET" action="{% url 'resultados_busqueda' %}">
-        {% csrf_token %}
         <div class="input-group">
-            <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar..." name="Buscar" value="{{ request.GET.Buscar }}">
+            <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar..." id="buscar" name="buscar" value="{{ buscar }}">
             <div class="input-group-append">
                 <button class="btn btn-primary" type="submit">
                     <i class="fa fa-search" aria-hidden="true"></i>
@@ -79,38 +102,97 @@
         <hr />
         <div class="row justify-content-around">
             {% for producto in productos %}
-            <a class="col-3" href="/producto/{{ producto.pk }}" style="text-decoration: none;">
-                <div class="card" style="padding-left: 0; padding-right: 0;">
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card h-100" style="padding-left: 0; padding-right: 0;">
                     {% if producto.imagen %}
+                    <a href="/producto/{{ producto.pk }}" style="text-decoration: none;">
                     <div class="mx-auto"
-                        style="height: 250px; background-image: url({% static 'media/productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
+                        style="height: 250px; background-image: url({% static 'productos/' %}{{ producto.imagen }}); background-size: cover; width: 100%; background-position: center;">
                     </div>
+                    </a>
                     {% endif %}
                     <div>
                         <div class="card-body">
                             <h3 class="card-title">{{ producto.nombre }}</h3>
                             <div class="row">
                                 <p class="col-9">{{ producto.precio }}€</p>
-                                <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center col-3">
-                                    {% csrf_token %}
-                                    <!-- Agregar campos ocultos o parámetros necesarios para identificar el producto -->
-                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
-                                    <button type="submit" class="btn btn-warning text-center" title="Añadir al carrito"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
-                                </form>
+                                <li class="list-group-item">
+                                {% if producto.stock > 0 %}
+                                    {% if producto.stock < 5 %}
+                                        <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center col-3">
+                                        {% csrf_token %}
+                                        <!-- Agregar campos ocultos o parámetros necesarios para identificar el producto -->
+                                            <div class="col-auto mx-auto">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="me-2">
+                                                        <input type="number" name="cantidad" value="{% if item.cantidad %}{{ item.cantidad }}{% else %}1{% endif %}" min="1" max="{{ producto.stock }}">
+                                                    </div>
+                                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                                    <button type="submit" class="btn btn-warning text-center mt-2 mb-2" title="Añadir al carrito"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <span class="badge rounded-pill bg-warning" style="font-size: medium;">Quedan pocas unidades</span>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'agregar_al_carrito' %}" class="text-center col-3">
+                                        {% csrf_token %}
+                                        <!-- Agregar campos ocultos o parámetros necesarios para identificar el producto -->
+                                        <div class="col-auto mx-auto">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="me-2">
+                                                    <input type="number" name="cantidad" value="{% if item.cantidad %}{{ item.cantidad }}{% else %}1{% endif %}" min="1" max="{{ producto.stock }}">
+                                                </div>
+                                                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                                <button type="submit" class="btn btn-warning text-center mt-2 mb-2" title="Añadir al carrito"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+                                            </div>
+                                        </div>
+                                        </form>
+                                        
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge rounded-pill bg-danger" style="font-size: medium;">Sin stock</span>                
+                                {% endif %}
+                            </li>
                             </div>
                         </div>
                     </div>
                 </div>
-            </a>
+            </div>
             {% endfor %}
         </div>
     </div>
 </body>
-{% endblock%}
+{% endblock %}
 </html>
 
 <script>
-    document.getElementById("dropdown").addEventListener("change", function() {
-        document.getElementById("miFormulario").submit();
+    // Función para enviar automáticamente el formulario cuando cambia el menú desplegable o el rango de precios
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener elementos
+        const dropdown = document.getElementById('dropdown');
+        const priceRange = document.getElementById('priceRange');
+        const buscar = document.getElementById('buscar');
+
+        // Función para enviar el formulario cuando cambia el menú desplegable
+        dropdown.addEventListener('change', function() {
+            document.getElementById('miFormulario').submit();
+        });
+
+        // Función para enviar el formulario cuando cambia el rango de precios
+        priceRange.addEventListener('input', function() {
+            document.getElementById('miFormulario').submit();
+        });
+
+        buscar.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                // Evita la acción predeterminada para que no se envíe el formulario automáticamente
+                event.preventDefault();
+
+                // Verifica si hay un valor en el campo de búsqueda antes de enviar el formulario
+                if (buscar.value.trim() !== '') {
+                    document.getElementById('miFormulario').submit();
+                }
+            }
+        });
     });
-    </script>
+</script>

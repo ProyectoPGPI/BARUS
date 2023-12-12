@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Mis pedidos 
+{% endblock %}
+
+{% block contenido %}
+    <div class="container mt-4">
+        <h2>Buscar Pedidos</h2>
+        <form method="get" action="{% url 'buscar_pedidos' %}">
+            <label for="numero_pedido">Número de Pedido:</label>
+            <input type="text" name="numero_pedido" value="{{ numero_pedido }}">
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+{% endblock %}

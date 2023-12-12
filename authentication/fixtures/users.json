@@ -1,0 +1,58 @@
+[
+    {
+        "model": "auth.user",
+        "pk": 1,
+        "fields": {
+            "username": "usuario1",
+            "password": "usuario1",
+            "email": "usuario1@gmail.com",
+            "first_name": "Nombre1",
+            "last_name": "Apellido1",
+            "is_active": true,
+            "is_staff": false,
+            "is_superuser": false
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 2,
+        "fields": {
+            "username": "usuario2",
+            "password": "usuario2",
+            "email": "usuario2@gmail.com",
+            "first_name": "Nombre2",
+            "last_name": "Apellido2",
+            "is_active": true,
+            "is_staff": false,
+            "is_superuser": false
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 3,
+        "fields": {
+            "username": "usuario3",
+            "password": "usuario3",
+            "email": "usuario3@gmail.com",
+            "first_name": "Nombre3",
+            "last_name": "Apellido3",
+            "is_active": true,
+            "is_staff": false,
+            "is_superuser": false
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 4,
+        "fields": {
+            "username": "admin",
+            "password": "$2b$12$hT32pjW3NKthcif/YVCNmON1gBhjr22vi4BdBXVBB7G4B6/dketTu",
+            "email": "admin@gmail.com",
+            "first_name": "Admin",
+            "last_name": "Admin",
+            "is_active": true,
+            "is_staff": true,
+            "is_superuser": true
+        }
+    }
+]
