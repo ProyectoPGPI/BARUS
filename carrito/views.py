@@ -42,6 +42,8 @@ def carrito(request):
             context['carrito'] = Carrito.objects.get(id = ultimo_carrito)
         if Direccion.objects.filter(id = ultima_direccion).exists():
             context['direccion'] = Direccion.objects.get(id = ultima_direccion)
+    if 'carrito' not in context:
+        context['boton'] = False
     return render(request, 'carrito.html', context)
             
 
@@ -251,9 +253,11 @@ def direccion(request):
     context = {}
     if request.user.is_authenticated:
         ultima_direccion = Direccion.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
-        context['direccion'] = Direccion.objects.get(id = ultima_direccion)
+        if Direccion.objects.filter(id = ultima_direccion).exists():
+            context['direccion'] = Direccion.objects.get(id = ultima_direccion)
     else:
-        context['direccion'] = request.session['direccion_data']
+        if 'direccion_data' in request.session:
+            context['direccion'] = request.session['direccion_data']
     return render(request, 'direccion.html', context)
 
 def crear_direccion(request):
@@ -271,7 +275,10 @@ def crear_direccion(request):
         # Crea una instancia de Direccion y guarda en la base de datos
         if request.user.is_authenticated:
             ultima_direccion = Direccion.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
-            direccion_existente = Direccion.objects.get(id = ultima_direccion)
+            if Direccion.objects.filter(id = ultima_direccion).exists():
+                direccion_existente = Direccion.objects.get(id = ultima_direccion)
+            else:
+                direccion_existente = None
 
             if direccion_existente:
                 # Si la dirección existe, actualiza los campos
