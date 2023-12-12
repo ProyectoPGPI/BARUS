@@ -162,5 +162,10 @@ SERVER_EMAIL = 'baruspgpi@gmail.com'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.dirname(BASE_DIR)
 
-MEDIA_URL = 'BARUS/catalogo/static/media/productos/'
-MEDIA_ROOT = os.path.join(PROJECT_DIR, 'BARUS/catalogo/static/media/productos/')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'BARUS/static/productos')
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]

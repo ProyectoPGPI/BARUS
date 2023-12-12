@@ -100,21 +100,18 @@ def logout_view(request):
 
 def reclamaciones(request):
     if request.method == 'POST':
-        form = ReclamacionForm(request.POST)
-        if form.is_valid():
-            reclamacion = form.save(commit=False)
-            reclamacion.usuario = request.user
-            reclamacion.save()
-            return redirect('reclamaciones')
-        else:
-            # Manejar mensajes de error específicos
-            if 'titulo' in form.errors:
-                messages.error(request, 'La longitud del título debe ser de 20 carácteres como máximo.')
-            if 'descripcion' in form.errors:
-                messages.error(request, 'La longitud de la descripción debe ser de 255 carácteres como máximo.')
+        titulo = request.POST.get('titulo')
+        descripcion = request.POST.get('descripcion')
 
-    else:
-        form = ReclamacionForm()
+        # Validar longitud del título y descripción
+        if len(titulo) > 20:
+            messages.error(request, 'La longitud del título debe ser de 20 caracteres como máximo.')
+        elif len(descripcion) > 255:
+            messages.error(request, 'La longitud de la descripción debe ser de 255 caracteres como máximo.')
+        else:
+            # Crear la reclamación si la validación pasa
+            Reclamacion.objects.create(titulo=titulo, descripcion=descripcion, estado='Pendiente', usuario=request.user)
+            return redirect('reclamaciones')
 
     reclamaciones = Reclamacion.objects.filter(usuario=request.user)
-    return render(request, 'reclamaciones.html', {'form': form, 'reclamaciones': reclamaciones})
+    return render(request, 'reclamaciones.html', {'reclamaciones': reclamaciones})
