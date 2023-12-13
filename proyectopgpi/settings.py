@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-=l)ox@7bm2-lpfvn(7a+0024hsxbc(cdwtpy$v4^plmsm$h!40'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['barus.pythonanywhere.com']
 
 
 # Application definition
@@ -72,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'proyectopgpi.wsgi.application'
+
 
 
 # Database
@@ -86,12 +86,13 @@ WSGI_APPLICATION = 'proyectopgpi.wsgi.application'
 }'''
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'HOST': 'localhost',
-        'PORT': 5432,
-        'NAME': 'django',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
+
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': 'barus.mysql.pythonanywhere-services.com',
+        'NAME': 'barus$default',
+        'USER': 'barus',
+        'PASSWORD': 'proyectopgpi',
+	      'CHARSET': 'utf8',
     }
 }
 
@@ -163,7 +164,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.dirname(BASE_DIR)
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(PROJECT_DIR, 'BARUS/static/productos')
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'barus/static/productos')
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
