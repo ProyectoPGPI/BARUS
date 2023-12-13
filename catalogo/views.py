@@ -104,6 +104,14 @@ def catalogo(request):
     if 'carrito_id' not in request.session:
         carrito = Carrito.objects.create()
         request.session['carrito_id'] = carrito.id
+    
+    if request.user.is_authenticated:
+        ultimo_carrito_id = Carrito.objects.filter(cliente=request.user.id).aggregate(Max('id'))['id__max']
+        if Carrito.objects.filter(id = ultimo_carrito_id).exists():
+            pass
+        else:
+            Carrito.objects.create(cliente_id = request.user.id)
+
     return render(request, 'catalogo.html', context)
 
 def product_view(request, product_id):
