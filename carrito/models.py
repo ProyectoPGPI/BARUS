@@ -6,20 +6,35 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Carrito(models.Model):
+    FORMA_ENTREGA = (
+        ('Estandar', 'Estandar'),
+        ('Express', 'Express'),
+    )
+
+
     cliente = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     productos = models.ManyToManyField(Producto, through='ItemCarrito')
     total = models.DecimalField(default=0, max_digits=10, decimal_places=2)
     gastos_envio = models.DecimalField(default=5, max_digits=5, decimal_places=2, null=True, blank=True)
+    forma_entrega = models.CharField(max_length=20, choices=FORMA_ENTREGA, default='Estandar')
 
     def calcular_total(self):
         precios = sum(item.producto.precio * item.cantidad for item in self.itemcarrito_set.all())
         
-        if precios <= 50 and precios > 0:
-            self.gastos_envio = 5
-            self.total = precios + self.gastos_envio
+        if self.forma_entrega == 'Express':
+            if precios < 900 and precios > 0:
+                self.gastos_envio = 30
+                self.total = precios + self.gastos_envio
+            else:
+                self.gastos_envio = 0
+                self.total = precios + self.gastos_envio
         else:
-            self.gastos_envio = 0
-            self.total = precios
+            if precios < 150 and precios > 0:
+                self.gastos_envio = 5
+                self.total = precios + self.gastos_envio
+            else:
+                self.gastos_envio = 0
+                self.total = precios + self.gastos_envio
 
         self.save()
     

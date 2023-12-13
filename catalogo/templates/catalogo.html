@@ -67,7 +67,7 @@
         <form method="post" action="{% url 'catalogo' %}" id="miFormulario">
             {% csrf_token %}
             <label for="dropdown">Sección</label>
-            <select id="dropdown" name="opcion">
+            <select id="dropdown" name="opcion" class="form-control">
                 <option value="general" {% if opcion_seleccionada == 'general' and opcion_seleccionada != None %}selected{% endif %}>General</option>
                 <option value="interior" {% if opcion_seleccionada == 'interior' %}selected{% endif %}>Interior</option>
                 <option value="exterior" {% if opcion_seleccionada == 'exterior' %}selected{% endif %}>Exterior</option>

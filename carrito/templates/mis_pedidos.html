@@ -38,6 +38,8 @@
                     <br>
                     <p><strong>Método de pago: </strong> {{ pedido.metodo_pago }}</p>
                     <p><strong>Estado del pedido: </strong> {{ pedido.estado }}</p>
+                    <p><strong>Forma de entrega: </strong> {{ pedido.carrito.forma_entrega }}</p>
+                    <p><strong>Precio Total: </strong> {{ pedido.carrito.total }}€</p>
                 </ul>
 
             </div>

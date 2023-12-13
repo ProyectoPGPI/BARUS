@@ -86,12 +86,13 @@ TEMPLATES = [
 }'''
 DATABASES = {
     'default': {
+
         'ENGINE': 'django.db.backends.mysql',
         'HOST': 'barus.mysql.pythonanywhere-services.com',
         'NAME': 'barus$default',
         'USER': 'barus',
         'PASSWORD': 'proyectopgpi',
-	'CHARSET': 'utf8',
+	      'CHARSET': 'utf8',
     }
 }
 
