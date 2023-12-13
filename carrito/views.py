@@ -23,6 +23,15 @@ from django.contrib import messages
 
 # Create your views here.
 
+def forma_entrega(request):
+    opcion = request.POST.get('opcion')
+    ultimo_carrito = Carrito.objects.filter(cliente_id=request.user.id).aggregate(Max('id'))['id__max']
+    car = Carrito.objects.get(id = ultimo_carrito)
+    car.forma_entrega = opcion
+    car.calcular_total()
+    car.save()
+    return redirect('/carrito')
+
 def carrito(request):
     context = {}
     context['usuario'] = request.user
@@ -44,6 +53,7 @@ def carrito(request):
             context['direccion'] = Direccion.objects.get(id = ultima_direccion)
     if 'carrito' not in context:
         context['boton'] = False
+    context['opcion_seleccionada'] = Carrito.objects.get(id = ultimo_carrito).forma_entrega
     return render(request, 'carrito.html', context)
             
 
@@ -228,6 +238,7 @@ def enviar_correo_confirmacion(carrito, direccion):
 
         message += f'Total del pedido: {carrito.total} EUR\n'
         message += f'Método de pago: {pedido.metodo_pago}\n\n' 
+        message += f'Forma de entrega: {carrito.forma_entrega}\n\n'
 
         message += f'Dirección de entrega:\n'
         message += f'Nombre: {direccion.nombre} {direccion.apellidos}\n'

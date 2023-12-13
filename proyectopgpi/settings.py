@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'proyectopgpi.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': 'db',
+        'HOST': 'localhost',
         'PORT': 5432,
         'NAME': 'django',
         'USER': 'postgres',
